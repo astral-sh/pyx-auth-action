@@ -1,0 +1,26 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions: {}
+
+jobs:
+  test-exchange-only:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for testing the action itself
+      contents: read # for private repos
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        id: auth
+        with:
+          url: https://astral-sh-staging-api.pyx.dev/v1/upload/test/internal

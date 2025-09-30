@@ -1,10 +1,18 @@
 # pyx-auth-action
 
-Sets up Trusted Publishing to your [pyx](https://docs.pyx.dev) registry.
+[![Actions status](https://github.com/astral-sh/pyx-auth-action/actions/workflows/test.yml/badge.svg)](https://github.com/astral-sh/pyx-auth-action/actions)
+[![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?logo=discord&logoColor=white)](https://discord.gg/astral-sh)
+
+Get a temporary access token for publishing to a [pyx](https://docs.pyx.dev)
+registry with Trusted Publishing.
+
+To use this action, you must have a Trusted Publisher configured on pyx.
+Refer to the [pyx documentation](TODO) for more information.
 
 ## Contents
 
 - [Usage](#usage)
+  - [Prerequisites](#prerequisites)
   - [Quickstart](#quickstart)
   - [Use your workspace's default registry](#use-your-workspaces-default-registry)
   - [Pass the upload URL explicitly](#pass-the-upload-url-explicitly)
@@ -17,6 +25,21 @@ Sets up Trusted Publishing to your [pyx](https://docs.pyx.dev) registry.
   - [`token`](#token)
 
 ## Usage
+
+### Prerequisites
+
+To use this action, you must have a Trusted Publisher configured on pyx.
+Refer to the [pyx documentation](TODO) for more information.
+
+Additionally, this action **requires** the `id-token: write` permission,
+in order to fetch an OIDC token from GitHub. This permission is not
+granted by default, so you must explicitly add it to your job:
+
+```yaml
+permissions:
+  id-token: write # for Trusted Publishing to pyx
+  contents: read # for actions/checkout, if you're in a private repo
+```
 
 ### Quickstart
 
@@ -110,3 +133,24 @@ The upload token to use when publishing.
 > This token is short-lived and can only be used for uploading to
 > the projects scoped to your Trusted Publisher. However, it
 > is still a secret and should be treated like one.
+
+## Troubleshooting
+
+## Licence
+
+pyx-auth-action is licensed under either of
+
+- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or <https://www.apache.org/licenses/LICENSE-2.0>)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or <https://opensource.org/licenses/MIT>)
+
+at your option.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in pyx-auth-action by you, as defined in the Apache-2.0 license, shall be
+dually licensed as above, without any additional terms or conditions.
+
+<div align="center">
+  <a target="_blank" href="https://astral.sh" style="background:none">
+    <img src="https://raw.githubusercontent.com/astral-sh/ruff/main/assets/svg/Astral.svg">
+  </a>
+</div>

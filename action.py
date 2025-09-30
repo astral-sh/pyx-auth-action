@@ -143,7 +143,6 @@ def _mint_token(url: URIReference, id_token: str) -> str:
     class MintResponse(msgspec.Struct):
         token: str
         expires: int
-        success: Literal[True]
 
     try:
         mint_data = msgspec.json.decode(mint_resp.data, type=MintResponse)

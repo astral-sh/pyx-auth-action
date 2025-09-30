@@ -21,7 +21,7 @@ jobs:
     environment: test
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
@@ -40,9 +40,9 @@ jobs:
 
     steps:
       - name: setup uv
-        uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4 # v6.7.0
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
@@ -51,8 +51,26 @@ jobs:
         with:
           url: ${{ env.PYX_UPLOAD_URL }}
 
-      # - name: Publish package
-      #   run: |
-      #     uv publish --publish-url "${PYX_UPLOAD_URL}"
-      #   env:
-      #     UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}
+      - name: Checkout sampleproject
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          repository: pypa/sampleproject
+          path: sampleproject
+          persist-credentials: false
+
+      - name: Prep sampleproject
+        working-directory: sampleproject
+        run: |
+          stamp=$(date +%s)
+          version="4.0.${stamp}"
+
+          # Replace the version in pyproject.toml
+          sed -i "s/^version = \".*\"/version = \"${version}\"/" pyproject.toml
+
+      - name: Build and publish package
+        run: |
+          uv build
+          uv publish --publish-url "${PYX_UPLOAD_URL}"
+        working-directory: sampleproject
+        env:
+          UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}

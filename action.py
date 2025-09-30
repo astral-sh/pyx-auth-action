@@ -210,6 +210,7 @@ def _main() -> None:
 
     _info(f"✨ Successfully exchanged token in {duration:.4f}s")
 
+    _set_output("url", url.unsplit())
     _set_output("token", token)
 
 

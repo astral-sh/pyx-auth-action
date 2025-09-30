@@ -136,7 +136,9 @@ def _mint_token(url: URIReference, id_token: str) -> str:
         raise ValueError(f"Failed to mint token: {e}") from e
 
     if mint_resp.status != 200:
-        raise ValueError(f"Token minting returned HTTP {mint_resp.status}")
+        raise ValueError(
+            f"Token minting returned HTTP {mint_resp.status}: {mint_resp.data.decode('utf-8', errors='replace')}"
+        )
 
     class MintResponse(msgspec.Struct):
         token: str

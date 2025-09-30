@@ -1,0 +1,30 @@
+name: pyx-auth-action
+description: Authenticate to pyx using Trusted Publishing
+
+branding:
+  icon: lock
+  color: purple
+
+inputs:
+  url:
+    description: "Your registry's upload URL"
+    required: true
+
+outputs:
+  token:
+    description: "The temporary upload token"
+    value: ${{ steps.exchange.outputs.token }}
+
+runs:
+  using: composite
+  steps:
+    - name: setup uv
+      uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4 # v6.7.0
+
+    - name: exchange
+      id: exchange
+      run: |
+        uv run --script "${GITHUB_ACTION_PATH}/action.py"
+      shell: bash
+      env:
+        GHA_PYX_INPUT_URL: ${{ inputs.url }}

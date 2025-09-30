@@ -11,7 +11,8 @@
 import os
 import sys
 from pathlib import Path
-from typing import Literal, NoReturn
+from time import perf_counter
+from typing import NoReturn
 
 import msgspec.json
 import urllib3
@@ -21,6 +22,10 @@ from rfc3986 import URIReference, uri_reference, validators
 
 def _debug(msg: str) -> None:
     print(f"::debug::{msg}")
+
+
+def _info(msg: str) -> None:
+    print(f"::notice::{msg}")
 
 
 def _error(msg: str) -> None:
@@ -136,9 +141,7 @@ def _mint_token(url: URIReference, id_token: str) -> str:
         raise ValueError(f"Failed to mint token: {e}") from e
 
     if mint_resp.status != 200:
-        raise ValueError(
-            f"Token minting returned HTTP {mint_resp.status}: {mint_resp.data.decode('utf-8', errors='replace')}"
-        )
+        raise ValueError(f"Token minting returned HTTP {mint_resp.status}:")
 
     class MintResponse(msgspec.Struct):
         token: str
@@ -201,7 +204,11 @@ def _main() -> None:
     except Exception as e:
         _die(f"Invalid URL '{raw_url}': {e}")
 
+    start = perf_counter()
     token = _exchange(url)
+    duration = perf_counter() - start
+
+    _info(f"✨ Successfully exchanged token in {duration:.4f}s")
 
     _set_output("token", token)
 

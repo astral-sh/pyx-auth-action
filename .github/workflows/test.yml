@@ -8,6 +8,9 @@ on:
 
 permissions: {}
 
+env:
+  PYX_UPLOAD_URL: https://astral-sh-staging-api.pyx.dev/v1/upload/test/internal
+
 jobs:
   test-exchange-only:
     runs-on: ubuntu-latest
@@ -25,4 +28,31 @@ jobs:
       - uses: ./
         id: auth
         with:
-          url: https://astral-sh-staging-api.pyx.dev/v1/upload/test/internal
+          url: ${{ env.PYX_UPLOAD_URL }}
+
+  test-publish-e2e:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for testing the action itself
+      contents: read # for private repos
+
+    environment: test
+
+    steps:
+      - name: setup uv
+        uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4 # v6.7.0
+
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        id: auth
+        with:
+          url: ${{ env.PYX_UPLOAD_URL }}
+
+      # - name: Publish package
+      #   run: |
+      #     uv publish --publish-url "${PYX_UPLOAD_URL}"
+      #   env:
+      #     UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}

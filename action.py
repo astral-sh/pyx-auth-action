@@ -17,7 +17,7 @@ from typing import NoReturn
 import msgspec.json
 import urllib3
 from id import detect_credential
-from rfc3986 import URIReference, uri_reference, validators
+from rfc3986 import URIReference, builder, uri_reference, validators
 
 
 def _debug(msg: str) -> None:
@@ -42,13 +42,13 @@ def _add_mask(mask: str) -> None:
     print(f"::add-mask::{mask}")
 
 
-def _get_input(name: str) -> str:
+def _get_input(name: str) -> str | None:
     name = name.upper().replace("-", "_")
     var = f"GHA_PYX_INPUT_{name}"
 
     value = os.getenv(var)
-    if value is None:
-        _die(f"Input '{name}' not provided (missing env var '{var}')")
+    if not value:
+        return None
 
     return value
 
@@ -189,7 +189,30 @@ def _exchange(url: URIReference) -> str:
 
 
 def _main() -> None:
+    workspace = _get_input("workspace")
+    registry = _get_input("registry")
     raw_url = _get_input("url")
+    api_base = _get_input("api-base")
+
+    assert api_base, "api-base should have a default value"
+
+    # Workspace and registry are mutually exclusive with URL.
+    if raw_url and (workspace or registry):
+        _die("Specify either 'url' or 'workspace'/'registry', not both")
+
+    if not raw_url and not workspace:
+        _die("Must specify either 'url' or 'workspace'")
+
+    # Determine the upload URL from the inputs.
+    if not raw_url:
+        wip = builder.URIBuilder().from_uri(api_base)
+        if registry:
+            wip = wip.add_path(f"/v1/upload/{workspace}/{registry}")
+        else:
+            wip = wip.add_path(f"/v1/upload/{workspace}")
+
+        raw_url = wip.finalize().unsplit()
+
     url = uri_reference(raw_url).normalize()
 
     validator = (

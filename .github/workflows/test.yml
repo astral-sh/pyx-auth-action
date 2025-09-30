@@ -52,6 +52,38 @@ jobs:
           registry: internal
           api-base: https://astral-sh-staging-api.pyx.dev
 
+  selftest-inputs-mutex-xfail:
+    if: ${{ github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for testing the action itself
+      contents: read # for private repos
+
+    environment: test
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Expect failure when both URL and workspace/registry are provided
+        uses: ./
+        id: auth
+        continue-on-error: true
+        with:
+          url: ${{ env.PYX_UPLOAD_URL }}
+          workspace: test
+          registry: internal
+
+      - name: Check failure
+        run: |
+          if [ "${OUTCOME}" != "failure" ]; then
+            echo "Expected failure, got '${OUTCOME}'"
+            exit 1
+          fi
+        env:
+          OUTCOME: ${{ steps.auth.outcome }}
+
   selftest-publish-e2e:
     if: ${{ github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' }}
     runs-on: ubuntu-latest

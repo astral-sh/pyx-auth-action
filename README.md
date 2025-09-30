@@ -2,6 +2,20 @@
 
 Sets up Trusted Publishing to your [pyx](https://docs.pyx.dev) registry.
 
+## Contents
+
+- [Usage](#usage)
+  - [Quickstart](#quickstart)
+  - [Use your workspace's default registry](#use-your-workspaces-default-registry)
+  - [Pass the upload URL explicitly](#pass-the-upload-url-explicitly)
+- [Inputs](#inputs)
+  - [`workspace`](#workspace)
+  - [`registry`](#registry)
+  - [`url`](#url-input)
+- [Outputs](#outputs)
+  - [`url`](#url-output)
+  - [`token`](#token)
+
 ## Usage
 
 ### Quickstart

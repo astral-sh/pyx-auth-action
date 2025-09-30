@@ -1,0 +1,131 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions: {}
+
+env:
+  PYX_UPLOAD_URL: https://astral-sh-staging-api.pyx.dev/v1/upload/test/internal
+
+jobs:
+  selftest-exchange-only:
+    if: ${{ github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for testing the action itself
+      contents: read # for private repos
+
+    environment: test
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        id: auth
+        with:
+          url: ${{ env.PYX_UPLOAD_URL }}
+
+  selftest-exchange-only-workspace:
+    if: ${{ github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for testing the action itself
+      contents: read # for private repos
+
+    environment: test
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        id: auth
+        with:
+          workspace: test
+          registry: internal
+          api-base: https://astral-sh-staging-api.pyx.dev
+
+  selftest-inputs-mutex-xfail:
+    if: ${{ github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for testing the action itself
+      contents: read # for private repos
+
+    environment: test
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Expect failure when both URL and workspace/registry are provided
+        uses: ./
+        id: auth
+        continue-on-error: true
+        with:
+          url: ${{ env.PYX_UPLOAD_URL }}
+          workspace: test
+          registry: internal
+
+      - name: Check failure
+        run: |
+          if [ "${OUTCOME}" != "failure" ]; then
+            echo "Expected failure, got '${OUTCOME}'"
+            exit 1
+          fi
+        env:
+          OUTCOME: ${{ steps.auth.outcome }}
+
+  selftest-publish-e2e:
+    if: ${{ github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for testing the action itself
+      contents: read # for private repos
+
+    environment: test
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: setup uv
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+
+      - uses: ./
+        id: auth
+        with:
+          url: ${{ env.PYX_UPLOAD_URL }}
+
+      - name: Checkout sampleproject
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          repository: pypa/sampleproject
+          path: sampleproject
+          persist-credentials: false
+
+      - name: Prep sampleproject
+        working-directory: sampleproject
+        run: |
+          stamp=$(date +%s)
+          version="4.0.${stamp}"
+
+          # Replace the version in pyproject.toml
+          sed -i "s/^version = \".*\"/version = \"${version}\"/" pyproject.toml
+
+      - name: Build and publish package
+        run: |
+          uv build
+          uv publish --publish-url "${PYX_UPLOAD_URL}"
+        working-directory: sampleproject
+        env:
+          UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}

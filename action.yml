@@ -6,20 +6,45 @@ branding:
   color: purple
 
 inputs:
+  workspace:
+    description: |
+      The pyx workspace being published to.
+
+      Example: acme
+    required: false
+  registry:
+    description: |
+      The pyx registry being published to.
+
+      Example: main
+    required: false
   url:
-    description: "Your registry's upload URL"
+    description: |
+      The upload URL.
+
+      Example: https://api.pyx.dev/v1/upload/acme/main
+    required: false
+  api-base:
+    description: |
+      WARNING: NOT PART OF THE PUBLIC API
+
+      The base URL for the pyx API.
     required: true
+    default: "https://api.pyx.dev"
 
 outputs:
   token:
     description: "The temporary upload token"
     value: ${{ steps.exchange.outputs.token }}
+  url:
+    description: "The upload URL"
+    value: ${{ steps.exchange.outputs.url }}
 
 runs:
   using: composite
   steps:
     - name: setup uv
-      uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4 # v6.7.0
+      uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
 
     - name: exchange
       id: exchange
@@ -27,4 +52,7 @@ runs:
         uv run --script "${GITHUB_ACTION_PATH}/action.py"
       shell: bash
       env:
+        GHA_PYX_INPUT_WORKSPACE: ${{ inputs.workspace }}
+        GHA_PYX_INPUT_REGISTRY: ${{ inputs.registry }}
         GHA_PYX_INPUT_URL: ${{ inputs.url }}
+        GHA_PYX_INPUT_API_BASE: ${{ inputs.api-base }}

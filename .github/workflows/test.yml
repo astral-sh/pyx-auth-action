@@ -9,7 +9,7 @@ on:
 permissions: {}
 
 env:
-  PYX_UPLOAD_URL: https://astral-sh-staging-api.pyx.dev/v1/upload/test/internal
+  PYX_UPLOAD_URL: https://astral-sh-staging-api.pyx.dev/v1/upload/pyx-auth-action/main
 
 jobs:
   selftest-exchange-only:
@@ -56,8 +56,8 @@ jobs:
       - uses: ./
         id: auth
         with:
-          workspace: test
-          registry: internal
+          workspace: pyx-auth-action
+          registry: main
           api-base: https://astral-sh-staging-api.pyx.dev
 
   selftest-inputs-mutex-xfail:
@@ -84,8 +84,8 @@ jobs:
         continue-on-error: true
         with:
           url: ${{ env.PYX_UPLOAD_URL }}
-          workspace: test
-          registry: internal
+          workspace: pyx-auth-action
+          registry: main
 
       - name: Check failure
         run: |

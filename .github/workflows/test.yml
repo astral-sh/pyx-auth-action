@@ -60,6 +60,30 @@ jobs:
           registry: main
           api-base: https://astral-sh-staging-api.pyx.dev
 
+  selftest-exchange-only-workspace-default-registry:
+    if: |-
+      ${{
+          github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
+          github.event_name == 'push'
+       }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for testing the action itself
+      contents: read # for private repos
+
+    environment: test
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        id: auth
+        with:
+          workspace: pyx-auth-action
+          api-base: https://astral-sh-staging-api.pyx.dev
+
   selftest-inputs-mutex-xfail:
     if: |-
       ${{

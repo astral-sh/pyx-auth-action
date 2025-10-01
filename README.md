@@ -47,16 +47,23 @@ Use the `workspace` and `registry` inputs to tell pyx which workspace
 and registry you intend to publish to:
 
 ```yaml
-- uses: astral-sh/pyx-auth-action@v1
-  id: auth
-  with:
-    workspace: acme
-    registry: main
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for Trusted Publishing to pyx
+      contents: read # for actions/checkout, if you're in a private repo
+    steps:
+      - uses: astral-sh/pyx-auth-action@v1.0.0
+        id: auth
+        with:
+          workspace: acme
+          registry: main
 
-- run: uv publish
-  env:
-    UV_PUBLISH_URL: ${{ steps.auth.outputs.url }}
-    UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}
+      - run: uv publish
+        env:
+          UV_PUBLISH_URL: ${{ steps.auth.outputs.url }}
+          UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}
 ```
 
 ### Use your workspace's default registry
@@ -65,7 +72,7 @@ If you're publishing to your workspace's default registry, you can omit the
 `registry` input:
 
 ```yaml
-- uses: astral-sh/pyx-auth-action@v1
+- uses: astral-sh/pyx-auth-action@v1.0.0
   id: auth
   with:
     workspace: acme
@@ -82,7 +89,7 @@ Instead of passing `workspace` and `registry`, you can pass the upload URL
 directly:
 
 ```yaml
-- uses: astral-sh/pyx-auth-action@v1
+- uses: astral-sh/pyx-auth-action@v1.0.0
   id: auth
   with:
     url: https://api.pyx.dev/v1/upload/acme/main

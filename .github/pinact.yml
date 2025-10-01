@@ -1,0 +1,6 @@
+version: 3
+
+files:
+  - pattern: ../README.md
+  - pattern: ../action.yml
+  - pattern: workflows/*.yml

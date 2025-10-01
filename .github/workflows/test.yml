@@ -13,7 +13,11 @@ env:
 
 jobs:
   selftest-exchange-only:
-    if: ${{ github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' }}
+    if: |-
+      ${{
+          github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
+          github.event_name == 'push'
+       }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write # for testing the action itself
@@ -32,7 +36,11 @@ jobs:
           url: ${{ env.PYX_UPLOAD_URL }}
 
   selftest-exchange-only-workspace:
-    if: ${{ github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' }}
+    if: |-
+      ${{
+          github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
+          github.event_name == 'push'
+       }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write # for testing the action itself
@@ -53,7 +61,11 @@ jobs:
           api-base: https://astral-sh-staging-api.pyx.dev
 
   selftest-inputs-mutex-xfail:
-    if: ${{ github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' }}
+    if: |-
+      ${{
+          github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
+          github.event_name == 'push'
+       }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write # for testing the action itself
@@ -85,7 +97,11 @@ jobs:
           OUTCOME: ${{ steps.auth.outcome }}
 
   selftest-publish-e2e:
-    if: ${{ github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' }}
+    if: |-
+      ${{
+          github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
+          github.event_name == 'push'
+       }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write # for testing the action itself

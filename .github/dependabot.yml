@@ -10,13 +10,14 @@ updates:
       github-actions:
         patterns:
           - "*"
-  - package-ecosystem: "uv"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
-    groups:
-      uv:
-        patterns:
-          - "*"
+  # Broken; see: https://github.com/dependabot/dependabot-core/issues/11946
+  # - package-ecosystem: "uv"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #   cooldown:
+  #     default-days: 7
+  #   groups:
+  #     uv:
+  #       patterns:
+  #         - "*"

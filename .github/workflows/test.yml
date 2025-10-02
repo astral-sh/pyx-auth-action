@@ -9,7 +9,7 @@ on:
 permissions: {}
 
 env:
-  PYX_UPLOAD_URL: https://astral-sh-staging-api.pyx.dev/v1/upload/test/internal
+  PYX_UPLOAD_URL: https://astral-sh-staging-api.pyx.dev/v1/upload/pyx-auth-action/main
 
 jobs:
   selftest-exchange-only:
@@ -56,8 +56,32 @@ jobs:
       - uses: ./
         id: auth
         with:
-          workspace: test
-          registry: internal
+          workspace: pyx-auth-action
+          registry: main
+          api-base: https://astral-sh-staging-api.pyx.dev
+
+  selftest-exchange-only-workspace-default-registry:
+    if: |-
+      ${{
+          github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
+          github.event_name == 'push'
+       }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for testing the action itself
+      contents: read # for private repos
+
+    environment: test
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - uses: ./
+        id: auth
+        with:
+          workspace: pyx-auth-action
           api-base: https://astral-sh-staging-api.pyx.dev
 
   selftest-inputs-mutex-xfail:
@@ -84,8 +108,8 @@ jobs:
         continue-on-error: true
         with:
           url: ${{ env.PYX_UPLOAD_URL }}
-          workspace: test
-          registry: internal
+          workspace: pyx-auth-action
+          registry: main
 
       - name: Check failure
         run: |
@@ -133,7 +157,8 @@ jobs:
         working-directory: sampleproject
         run: |
           stamp=$(date +%s)
-          version="4.0.${stamp}"
+          rand=$(od -A n -t u -N 3 /dev/urandom | tr -d ' ')
+          version="4.0.${stamp}.${rand}"
 
           # Replace the version in pyproject.toml
           sed -i "s/^version = \".*\"/version = \"${version}\"/" pyproject.toml
@@ -141,7 +166,61 @@ jobs:
       - name: Build and publish package
         run: |
           uv build
-          uv publish --publish-url "${PYX_UPLOAD_URL}"
+          uv publish
         working-directory: sampleproject
         env:
+          UV_PUBLISH_URL: ${{ steps.auth.outputs.url }}
+          UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}
+
+  selftest-publish-e2e-workspace-default-registry:
+    if: |-
+      ${{
+          github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
+          github.event_name == 'push'
+       }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for testing the action itself
+      contents: read # for private repos
+
+    environment: test
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: setup uv
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+
+      - uses: ./
+        id: auth
+        with:
+          workspace: pyx-auth-action
+          api-base: https://astral-sh-staging-api.pyx.dev
+
+      - name: Checkout sampleproject
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          repository: pypa/sampleproject
+          path: sampleproject
+          persist-credentials: false
+
+      - name: Prep sampleproject
+        working-directory: sampleproject
+        run: |
+          stamp=$(date +%s)
+          rand=$(od -A n -t u -N 3 /dev/urandom | tr -d ' ')
+          version="4.0.${stamp}.${rand}"
+
+          # Replace the version in pyproject.toml
+          sed -i "s/^version = \".*\"/version = \"${version}\"/" pyproject.toml
+
+      - name: Build and publish package
+        run: |
+          uv build
+          uv publish
+        working-directory: sampleproject
+        env:
+          UV_PUBLISH_URL: ${{ steps.auth.outputs.url }}
           UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}

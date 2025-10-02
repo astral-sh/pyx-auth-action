@@ -213,6 +213,8 @@ def _main() -> None:
 
         raw_url = wip.finalize().unsplit()
 
+    _debug(f"Using upload URL: {raw_url}")
+
     url = uri_reference(raw_url).normalize()
 
     validator = (

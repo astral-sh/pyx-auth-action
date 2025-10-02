@@ -35,6 +35,16 @@ jobs:
         with:
           url: ${{ env.PYX_UPLOAD_URL }}
 
+      - name: assert output URL is correct
+        run: |
+          if [ "${OUTPUT_URL}" != "${PYX_UPLOAD_URL}" ]; then
+            echo "Expected output URL to be '${PYX_UPLOAD_URL}', got '${OUTPUT_URL}'"
+            exit 1
+          fi
+        env:
+          OUTPUT_URL: ${{ steps.auth.outputs.url }}
+          PYX_UPLOAD_URL: ${{ env.PYX_UPLOAD_URL }}
+
   selftest-exchange-only-workspace:
     if: |-
       ${{
@@ -224,3 +234,22 @@ jobs:
         env:
           UV_PUBLISH_URL: ${{ steps.auth.outputs.url }}
           UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}
+
+  all-tests-pass:
+    if: always()
+
+    needs:
+      - selftest-exchange-only
+      - selftest-exchange-only-workspace-default-registry
+      - selftest-exchange-only-workspace
+      - selftest-inputs-mutex-xfail
+      - selftest-publish-e2e
+      - selftest-publish-e2e-workspace-default-registry
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ensure all selftests passed
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          jobs: ${{ toJSON(needs) }}

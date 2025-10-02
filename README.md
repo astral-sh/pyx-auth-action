@@ -128,7 +128,8 @@ Mutually exclusive with `workspace` and `registry`.
 
 The upload URL being published to.
 
-This is identical to the [`url` input](#url-input) if that was provided.
+This is identical to the [`url` input](#url-input), if it was used.
+
 If `workspace` and `registry` were provided instead, this is the constructed
 upload URL.
 

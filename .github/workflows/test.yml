@@ -35,6 +35,16 @@ jobs:
         with:
           url: ${{ env.PYX_UPLOAD_URL }}
 
+      - name: assert output URL is correct
+        run: |
+          if [ "${OUTPUT_URL}" != "${PYX_UPLOAD_URL}" ]; then
+            echo "Expected output URL to be '${PYX_UPLOAD_URL}', got '${OUTPUT_URL}'"
+            exit 1
+          fi
+        env:
+          OUTPUT_URL: ${{ steps.auth.outputs.url }}
+          PYX_UPLOAD_URL: ${{ env.PYX_UPLOAD_URL }}
+
   selftest-exchange-only-workspace:
     if: |-
       ${{

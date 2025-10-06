@@ -192,9 +192,9 @@ def _main() -> None:
     workspace = _get_input("workspace")
     registry = _get_input("registry")
     raw_url = _get_input("url")
-    api_base = _get_input("api-base")
+    api_base = _get_input("internal-api-base")
 
-    assert api_base, "api-base should have a default value"
+    assert api_base, "internal-api-base should have a default value"
 
     # Workspace and registry are mutually exclusive with URL.
     if raw_url and (workspace or registry):

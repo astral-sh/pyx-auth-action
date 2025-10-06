@@ -24,13 +24,6 @@ inputs:
 
       Example: https://api.pyx.dev/v1/upload/acme/main
     required: false
-  api-base:
-    description: |
-      WARNING: NOT PART OF THE PUBLIC API
-
-      The base URL for the pyx API.
-    required: true
-    default: "https://api.pyx.dev"
 
 outputs:
   token:
@@ -55,4 +48,5 @@ runs:
         GHA_PYX_INPUT_WORKSPACE: ${{ inputs.workspace }}
         GHA_PYX_INPUT_REGISTRY: ${{ inputs.registry }}
         GHA_PYX_INPUT_URL: ${{ inputs.url }}
-        GHA_PYX_INPUT_API_BASE: ${{ inputs.api-base }}
+        # Not part of the public interface, but allows overriding the API base for testing.
+        GHA_PYX_INPUT_INTERNAL_API_BASE: ${{ env.GHA_PYX_INPUT_INTERNAL_API_BASE || 'https://api.pyx.dev' }}

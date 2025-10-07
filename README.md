@@ -17,6 +17,7 @@ Refer to the [pyx documentation](TODO) for more information.
   - [Use your workspace's default registry](#use-your-workspaces-default-registry)
   - [Pass the upload URL explicitly](#pass-the-upload-url-explicitly)
 - [Inputs](#inputs)
+  - [`index`](#index)
   - [`workspace`](#workspace)
   - [`registry`](#registry)
   - [`url`](#url-input)
@@ -43,8 +44,19 @@ permissions:
 
 ### Quickstart
 
-Use the `workspace` and `registry` inputs to tell pyx which workspace
-and registry you intend to publish to:
+Use the `[[tool.uv.index]]` section in your `pyproject.toml` to configure
+your pyx registry:
+
+```toml
+[[tool.uv.index]]
+name = "main"
+url = "https://api.pyx.dev/simple/acme/main"
+publish-url = "https://api.pyx.dev/v1/upload/acme/main"
+```
+
+(Replace `acme` and `main` with your workspace and registry names.)
+
+Then, use the `index` input to tell pyx which index you intend to publish to:
 
 ```yaml
 jobs:
@@ -57,8 +69,7 @@ jobs:
       - uses: astral-sh/pyx-auth-action@72c349389064ca0c0550f640971537eabc648de4 # v0.0.2
         id: auth
         with:
-          workspace: acme
-          registry: main
+          index: main
 
       - run: uv publish
         env:
@@ -67,6 +78,10 @@ jobs:
 ```
 
 ### Use your workspace's default registry
+
+If you don't want to use the `[[tool.uv.index]]` section in your
+`pyproject.toml`, you can specify the `workspace` and `registry` inputs
+directly.
 
 If you're publishing to your workspace's default registry, you can omit the
 `registry` input:
@@ -102,11 +117,21 @@ directly:
 
 ## Inputs
 
+### `index`
+
+The name of the index to publish to, as defined in the
+`[[tool.uv.index]]` section of your `pyproject.toml`.
+
+See [uv - Publishing your package](https://docs.astral.sh/uv/guides/package/#publishing-your-package)
+for more information on configuring indexes for publishing.
+
+Mutually exclusive with `workspace`, `registry`, and `url`.
+
 ### `workspace`
 
 The workspace being published to.
 
-Mutually exclusive with `url`.
+Mutually exclusive with `index` and `url`.
 
 ### `registry`
 
@@ -114,13 +139,13 @@ The registry being published to, within the [`workspace`](#workspace).
 
 Optional; defaults to the workspace's default registry.
 
-Mutually exclusive with `url`.
+Mutually exclusive with `index` and `url`.
 
 ### <a id="url-input"></a> `url`
 
 The upload URL being published to.
 
-Mutually exclusive with `workspace` and `registry`.
+Mutually exclusive with `index`, `workspace`, and `registry`.
 
 ## Outputs
 

@@ -15,6 +15,7 @@ from time import perf_counter
 from typing import NoReturn
 
 import msgspec.json
+import tomllib
 import urllib3
 from id import detect_credential
 from rfc3986 import URIReference, builder, uri_reference, validators
@@ -189,33 +190,55 @@ def _exchange(url: URIReference) -> str:
 
 
 def _main() -> None:
+    index = _get_input("index")
     workspace = _get_input("workspace")
     registry = _get_input("registry")
     raw_url = _get_input("url")
-    api_base = _get_input("internal-api-base")
 
+    api_base = _get_input("internal-api-base")
     assert api_base, "internal-api-base should have a default value"
 
-    # Workspace and registry are mutually exclusive with URL.
-    if raw_url and (workspace or registry):
-        _die("Specify either 'url' or 'workspace'/'registry', not both")
-
-    if not raw_url and not workspace:
-        _die("Must specify either 'url' or 'workspace'")
+    # index, workspace/registry, and url are mutually exclusive.
+    if sum((bool(index), bool(workspace), bool(raw_url))) != 1:
+        _die("Specify exactly one of 'index', 'workspace'/'registry', or 'url'")
 
     # Determine the upload URL from the inputs.
-    if not raw_url:
+    if index:
+        try:
+            pyproject = tomllib.loads(
+                Path("pyproject.toml").read_text(encoding="utf-8")
+            )
+        except FileNotFoundError:
+            _die(f"Can't discover upload URL for {index}: pyproject.toml not found")
+        except Exception as e:
+            _die(
+                f"Can't discover upload URL for {index}: Failed to parse pyproject.toml: {e}"
+            )
+
+        # We're looking for a `[[tool.uv.index]]` section with a matching name.
+        indices = pyproject.get("tool", {}).get("uv", {}).get("index", [])
+        if not (index := next((i for i in indices if i.get("name") == index), None)):
+            _die(f"Index '{index}' not found in pyproject.toml")
+
+        if not (upload_url := index.get("publish-url")):
+            _die(f"Index '{index}' does not have a 'publish-url'")
+
+        if not isinstance(upload_url, str):
+            _die(f"Index '{index}' has an invalid 'publish-url'")
+    elif raw_url:
+        upload_url = raw_url
+    else:
         wip = builder.URIBuilder().from_uri(api_base)
         if registry:
             wip = wip.add_path(f"/v1/upload/{workspace}/{registry}")
         else:
             wip = wip.add_path(f"/v1/upload/{workspace}")
 
-        raw_url = wip.finalize().unsplit()
+        upload_url = wip.finalize().unsplit()
 
-    _debug(f"Using upload URL: {raw_url}")
+    _debug(f"Using upload URL: {upload_url}")
 
-    url = uri_reference(raw_url).normalize()
+    url = uri_reference(upload_url).normalize()
 
     validator = (
         validators.Validator()

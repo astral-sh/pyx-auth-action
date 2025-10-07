@@ -37,8 +37,8 @@ jobs:
 
           [[tool.uv.index]]
           name = "main"
-          url = "https://api.pyx.dev/simple/pyx-auth-action/main"
-          publish-url = "https://api.pyx.dev/v1/upload/pyx-auth-action/main"
+          url = "https://astral-sh-staging-api.pyx.dev/simple/pyx-auth-action/main"
+          publish-url = "https://astral-sh-staging-api.pyx.dev/v1/upload/pyx-auth-action/main"
           EOF
 
       - uses: ./

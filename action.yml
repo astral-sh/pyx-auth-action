@@ -6,6 +6,14 @@ branding:
   color: purple
 
 inputs:
+  index:
+    description: |
+      The name of the pyx index (in your `pyproject.toml`) to authenticate against.
+
+      To use this setting, you must have an appropriate `[[tool.uv.index]]`
+      section in your `pyproject.toml`.
+
+      See: https://docs.astral.sh/uv/guides/package/#publishing-your-package
   workspace:
     description: |
       The pyx workspace being published to.
@@ -45,6 +53,7 @@ runs:
         uv run --script "${GITHUB_ACTION_PATH}/action.py"
       shell: bash
       env:
+        GHA_PYX_INPUT_INDEX: ${{ inputs.index }}
         GHA_PYX_INPUT_WORKSPACE: ${{ inputs.workspace }}
         GHA_PYX_INPUT_REGISTRY: ${{ inputs.registry }}
         GHA_PYX_INPUT_URL: ${{ inputs.url }}

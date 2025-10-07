@@ -14,6 +14,7 @@ env:
 
 jobs:
   selftest-exchange-only-index:
+    name: "Test: ensure that token exchange works with the `index` input"
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
@@ -47,6 +48,7 @@ jobs:
           index: main
 
   selftest-exchange-only-upload-url:
+    name: "Test: ensure that token exchange works with the `url` input"
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
@@ -80,6 +82,7 @@ jobs:
           PYX_UPLOAD_URL: ${{ env.PYX_UPLOAD_URL }}
 
   selftest-exchange-only-workspace:
+    name: "Test: ensure that token exchange works with the `workspace` and `registry` inputs"
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
@@ -104,6 +107,7 @@ jobs:
           registry: main
 
   selftest-exchange-only-workspace-default-registry:
+    name: "Test: ensure that token exchange works with the `workspace` input and default registry"
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
@@ -126,7 +130,52 @@ jobs:
         with:
           workspace: pyx-auth-action
 
+  selftest-inputs-index-no-publish-url-xfail:
+    name: "Test: expect failure when using `index` input but configured index has no publish-url"
+    if: |-
+      ${{
+          github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
+          github.event_name == 'push'
+       }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for testing the action itself
+      contents: read # for private repos
+
+    environment: test
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Create a dummy pyproject.toml without publish-url
+        run: |
+          cat <<EOF >> pyproject.toml
+
+          [[tool.uv.index]]
+          name = "main"
+          url = "https://astral-sh-staging-api.pyx.dev/simple/pyx-auth-action/main"
+          EOF
+
+      - name: Expect failure when index has no publish-url
+        uses: ./
+        id: auth
+        continue-on-error: true
+        with:
+          index: main
+
+      - name: Check failure
+        run: |
+          if [ "${OUTCOME}" != "failure" ]; then
+            echo "Expected failure, got '${OUTCOME}'"
+            exit 1
+          fi
+        env:
+          OUTCOME: ${{ steps.auth.outcome }}
+
   selftest-inputs-mutex-xfail:
+    name: "Test: expect failure when both `url` and `workspace`/`registry` are provided"
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
@@ -163,6 +212,7 @@ jobs:
           OUTCOME: ${{ steps.auth.outcome }}
 
   selftest-publish-e2e:
+    name: "Test: end-to-end publish using the action to get a token"
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
@@ -215,6 +265,7 @@ jobs:
           UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}
 
   selftest-publish-e2e-workspace-default-registry:
+    name: "Test: end-to-end publish using the action with `workspace` input and default registry"
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
@@ -267,6 +318,7 @@ jobs:
           UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}
 
   all-tests-pass:
+    name: "Ensure all selftests pass"
     if: always()
 
     needs:
@@ -274,6 +326,7 @@ jobs:
       - selftest-exchange-only-upload-url
       - selftest-exchange-only-workspace-default-registry
       - selftest-exchange-only-workspace
+      - selftest-inputs-index-no-publish-url-xfail
       - selftest-inputs-mutex-xfail
       - selftest-publish-e2e
       - selftest-publish-e2e-workspace-default-registry

@@ -13,6 +13,22 @@ env:
   GHA_PYX_INPUT_INTERNAL_API_BASE: https://astral-sh-staging-api.pyx.dev
 
 jobs:
+  unit:
+    name: "Test: unit tests"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # for private repos
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: setup uv
+        uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0
+
+      - run: make test
+
   selftest-exchange-only-index:
     name: "Test: ensure that token exchange works with the `index` input"
     if: |-
@@ -322,6 +338,7 @@ jobs:
     if: always()
 
     needs:
+      - unit
       - selftest-exchange-only-index
       - selftest-exchange-only-upload-url
       - selftest-exchange-only-workspace-default-registry

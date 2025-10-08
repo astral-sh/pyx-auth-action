@@ -56,6 +56,7 @@ jobs:
           name = "main"
           url = "https://astral-sh-staging-api.pyx.dev/simple/pyx-auth-action/main"
           publish-url = "https://astral-sh-staging-api.pyx.dev/v1/upload/pyx-auth-action/main"
+          explicit = true
           EOF
 
       - uses: ./
@@ -172,6 +173,7 @@ jobs:
           [[tool.uv.index]]
           name = "main"
           url = "https://astral-sh-staging-api.pyx.dev/simple/pyx-auth-action/main"
+          explicit = true
           EOF
 
       - name: Expect failure when index has no publish-url

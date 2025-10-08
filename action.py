@@ -85,7 +85,7 @@ def _get_audience(url: URIReference) -> str:
     if audience_resp.status != 200:
         raise ValueError(f"Audience URL returned HTTP {audience_resp.status}")
 
-    class AudienceResponse(msgspec.Struct):
+    class AudienceResponse(msgspec.Struct, frozen=True):
         audience: str
 
     try:
@@ -144,7 +144,7 @@ def _mint_token(url: URIReference, id_token: str) -> str:
     if mint_resp.status != 200:
         raise ValueError(f"Token minting returned HTTP {mint_resp.status}:")
 
-    class MintResponse(msgspec.Struct):
+    class MintResponse(msgspec.Struct, frozen=True):
         token: str
         expires: int
 

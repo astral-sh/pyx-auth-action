@@ -12,6 +12,7 @@ env:
   STAGING_PYX_UPLOAD_URL: https://astral-sh-staging-api.pyx.dev/v1/upload/pyx-auth-action/main
   # most tests use the staging API.
   GHA_PYX_INPUT_INTERNAL_API_BASE: https://astral-sh-staging-api.pyx.dev
+  PYX_API_URL: https://astral-sh-staging-api.pyx.dev
 
 jobs:
   unit:
@@ -352,6 +353,7 @@ jobs:
 
     env:
       GHA_PYX_INPUT_INTERNAL_API_BASE: https://api.pyx.dev
+      PYX_API_URL: https://api.pyx.dev
 
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0

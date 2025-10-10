@@ -57,5 +57,3 @@ runs:
         GHA_PYX_INPUT_WORKSPACE: ${{ inputs.workspace }}
         GHA_PYX_INPUT_REGISTRY: ${{ inputs.registry }}
         GHA_PYX_INPUT_URL: ${{ inputs.url }}
-        # Not part of the public interface, but allows overriding the API base for testing.
-        GHA_PYX_INPUT_INTERNAL_API_BASE: ${{ env.GHA_PYX_INPUT_INTERNAL_API_BASE || 'https://api.pyx.dev' }}

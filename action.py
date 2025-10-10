@@ -195,8 +195,7 @@ def _main() -> None:
     registry = _get_input("registry")
     raw_url = _get_input("url")
 
-    api_base = _get_input("internal-api-base")
-    assert api_base, "internal-api-base should have a default value"
+    api_base = os.getenv("PYX_API_URL", "https://api.pyx.dev")
 
     # index, workspace/registry, and url are mutually exclusive.
     if sum((bool(index), bool(workspace), bool(raw_url))) != 1:

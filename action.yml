@@ -44,21 +44,8 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: fetch temporary uv
-      uses: dawidd6/action-download-artifact@v11
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        repo: astral-sh/uv
-        workflow: ci.yml
-        pr: 16234
-        name: "uv-linux-libc-.+"
-        name_is_regexp: true
-
-    - name: Add uv to PATH
-      shell: bash
-      run: |
-        path=$(find "$(pwd)" -name 'uv-linux-libc*' | head -n 1)
-        echo "${path}" >> ${GITHUB_PATH}
+    - name: setup uv
+      uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0
 
     - name: exchange
       id: exchange

@@ -250,25 +250,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: fetch temporary uv
-        uses: dawidd6/action-download-artifact@v11
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          repo: astral-sh/uv
-          workflow: ci.yml
-          pr: 16234
-          name: "uv-linux-libc-.+"
-          name_is_regexp: true
-
-      - name: Find uv
-        id: find-uv
-        run: |
-          path=$(find "$(pwd)" -name 'uv-linux-libc*' | head -n 1)
-          chmod +x "${path}"/*
-          echo "path=${path}" >> $GITHUB_OUTPUT
-
-      # - name: setup uv
-      #   uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0
+      - name: setup uv
+        uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0
 
       - uses: ./
         id: auth
@@ -294,12 +277,10 @@ jobs:
 
       - name: Build and publish package
         run: |
-          "${UV_PREFIX}"/uv --version
-          "${UV_PREFIX}"/uv build
-          "${UV_PREFIX}"/uv publish
+          uv build
+          uv publish
         working-directory: sampleproject
         env:
-          UV_PREFIX: ${{ steps.find-uv.outputs.path }}
           UV_PUBLISH_URL: ${{ steps.auth.outputs.url }}
           UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}
 
@@ -322,25 +303,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: fetch temporary uv
-        uses: dawidd6/action-download-artifact@v11
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          repo: astral-sh/uv
-          workflow: ci.yml
-          pr: 16234
-          name: "uv-linux-libc-.+"
-          name_is_regexp: true
-
-      - name: Find uv
-        id: find-uv
-        run: |
-          path=$(find "$(pwd)" -name 'uv-linux-libc*' | head -n 1)
-          chmod +x "${path}"/*
-          echo "path=${path}" >> $GITHUB_OUTPUT
-
-      # - name: setup uv
-      #   uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0
+      - name: setup uv
+        uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0
 
       - uses: ./
         id: auth
@@ -366,12 +330,10 @@ jobs:
 
       - name: Build and publish package
         run: |
-          "${UV_PREFIX}"/uv --version
-          "${UV_PREFIX}"/uv build
-          "${UV_PREFIX}"/uv publish
+          uv build
+          uv publish
         working-directory: sampleproject
         env:
-          UV_PREFIX: ${{ steps.find-uv.outputs.path }}
           UV_PUBLISH_URL: ${{ steps.auth.outputs.url }}
           UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}
 
@@ -398,25 +360,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: fetch temporary uv
-        uses: dawidd6/action-download-artifact@v11
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          repo: astral-sh/uv
-          workflow: ci.yml
-          pr: 16234
-          name: "uv-linux-libc-.+"
-          name_is_regexp: true
-
-      - name: Find uv
-        id: find-uv
-        run: |
-          path=$(find "$(pwd)" -name 'uv-linux-libc*' | head -n 1)
-          chmod +x "${path}"/*
-          echo "path=${path}" >> $GITHUB_OUTPUT
-
-      # - name: setup uv
-      #   uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0
+      - name: setup uv
+        uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0
 
       - uses: ./
         id: auth
@@ -443,12 +388,10 @@ jobs:
 
       - name: Build and publish package
         run: |
-          "${UV_PREFIX}"/uv --version
-          "${UV_PREFIX}"/uv build
-          "${UV_PREFIX}"/uv publish
+          uv build
+          uv publish
         working-directory: sampleproject
         env:
-          UV_PREFIX: ${{ steps.find-uv.outputs.path }}
           UV_PUBLISH_URL: ${{ steps.auth.outputs.url }}
           UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}
 

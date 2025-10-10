@@ -262,6 +262,7 @@ jobs:
 
       - name: Add uv to PATH
         run: |
+          which uv
           ls
           echo "${CWD}" >> ${GITHUB_PATH}
 
@@ -330,6 +331,7 @@ jobs:
 
       - name: Add uv to PATH
         run: |
+          which uv
           ls
           echo "${CWD}" >> ${GITHUB_PATH}
 
@@ -402,6 +404,7 @@ jobs:
 
       - name: Add uv to PATH
         run: |
+          which uv
           ls
           echo "${CWD}" >> ${GITHUB_PATH}
 

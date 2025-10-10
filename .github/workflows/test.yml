@@ -262,8 +262,8 @@ jobs:
 
       - name: Add uv to PATH
         run: |
-          ls
-          echo "${CWD}" >> ${GITHUB_PATH}
+          path=$(find "${CWD}" -name 'uv-linux-libc*' | head -n 1)
+          echo "${path}" >> ${GITHUB_PATH}
           which uv
 
       # - name: setup uv
@@ -331,8 +331,8 @@ jobs:
 
       - name: Add uv to PATH
         run: |
-          ls
-          echo "${CWD}" >> ${GITHUB_PATH}
+          path=$(find "${CWD}" -name 'uv-linux-libc*' | head -n 1)
+          echo "${path}" >> ${GITHUB_PATH}
           which uv
 
       # - name: setup uv
@@ -404,8 +404,8 @@ jobs:
 
       - name: Add uv to PATH
         run: |
-          ls
-          echo "${CWD}" >> ${GITHUB_PATH}
+          path=$(find "${CWD}" -name 'uv-linux-libc*' | head -n 1)
+          echo "${path}" >> ${GITHUB_PATH}
           which uv
 
       # - name: setup uv

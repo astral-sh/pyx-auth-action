@@ -264,6 +264,7 @@ jobs:
         id: find-uv
         run: |
           path=$(find "$(pwd)" -name 'uv-linux-libc*' | head -n 1)
+          chmod +x "${path}/*"
           echo "path=${path}" >> $GITHUB_OUTPUT
 
       # - name: setup uv
@@ -335,6 +336,7 @@ jobs:
         id: find-uv
         run: |
           path=$(find "$(pwd)" -name 'uv-linux-libc*' | head -n 1)
+          chmod +x "${path}/*"
           echo "path=${path}" >> $GITHUB_OUTPUT
 
       # - name: setup uv
@@ -410,6 +412,7 @@ jobs:
         id: find-uv
         run: |
           path=$(find "$(pwd)" -name 'uv-linux-libc*' | head -n 1)
+          chmod +x "${path}/*"
           echo "path=${path}" >> $GITHUB_OUTPUT
 
       # - name: setup uv

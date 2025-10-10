@@ -292,6 +292,8 @@ jobs:
 
       - name: Build and publish package
         run: |
+          which uv
+          uv --version
           uv build
           uv publish
         working-directory: sampleproject
@@ -360,6 +362,8 @@ jobs:
 
       - name: Build and publish package
         run: |
+          which uv
+          uv --version
           uv build
           uv publish
         working-directory: sampleproject
@@ -433,6 +437,8 @@ jobs:
 
       - name: Build and publish package
         run: |
+          which uv
+          uv --version
           uv build
           uv publish
         working-directory: sampleproject

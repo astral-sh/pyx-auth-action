@@ -262,9 +262,9 @@ jobs:
 
       - name: Add uv to PATH
         run: |
-          which uv
           ls
           echo "${CWD}" >> ${GITHUB_PATH}
+          which uv
 
       # - name: setup uv
       #   uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0
@@ -331,9 +331,9 @@ jobs:
 
       - name: Add uv to PATH
         run: |
-          which uv
           ls
           echo "${CWD}" >> ${GITHUB_PATH}
+          which uv
 
       # - name: setup uv
       #   uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0
@@ -404,9 +404,9 @@ jobs:
 
       - name: Add uv to PATH
         run: |
-          which uv
           ls
           echo "${CWD}" >> ${GITHUB_PATH}
+          which uv
 
       # - name: setup uv
       #   uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0

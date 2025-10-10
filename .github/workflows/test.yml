@@ -9,8 +9,8 @@ on:
 permissions: {}
 
 env:
-  PYX_UPLOAD_URL: https://astral-sh-staging-api.pyx.dev/v1/upload/pyx-auth-action/main
-  GHA_PYX_INPUT_INTERNAL_API_BASE: https://astral-sh-staging-api.pyx.dev
+  STAGING_PYX_UPLOAD_URL: https://astral-sh-staging-api.pyx.dev/v1/upload/pyx-auth-action/main
+  PYX_API_URL: https://astral-sh-staging-api.pyx.dev
 
 jobs:
   unit:
@@ -86,17 +86,17 @@ jobs:
       - uses: ./
         id: auth
         with:
-          url: ${{ env.PYX_UPLOAD_URL }}
+          url: ${{ env.STAGING_PYX_UPLOAD_URL }}
 
       - name: assert output URL is correct
         run: |
-          if [ "${OUTPUT_URL}" != "${PYX_UPLOAD_URL}" ]; then
-            echo "Expected output URL to be '${PYX_UPLOAD_URL}', got '${OUTPUT_URL}'"
+          if [ "${OUTPUT_URL}" != "${STAGING_PYX_UPLOAD_URL}" ]; then
+            echo "Expected output URL to be '${STAGING_PYX_UPLOAD_URL}', got '${OUTPUT_URL}'"
             exit 1
           fi
         env:
           OUTPUT_URL: ${{ steps.auth.outputs.url }}
-          PYX_UPLOAD_URL: ${{ env.PYX_UPLOAD_URL }}
+          STAGING_PYX_UPLOAD_URL: ${{ env.STAGING_PYX_UPLOAD_URL }}
 
   selftest-exchange-only-workspace:
     name: "Test: ensure that token exchange works with the `workspace` and `registry` inputs"
@@ -216,7 +216,7 @@ jobs:
         id: auth
         continue-on-error: true
         with:
-          url: ${{ env.PYX_UPLOAD_URL }}
+          url: ${{ env.STAGING_PYX_UPLOAD_URL }}
           workspace: pyx-auth-action
           registry: main
 
@@ -254,7 +254,7 @@ jobs:
       - uses: ./
         id: auth
         with:
-          url: ${{ env.PYX_UPLOAD_URL }}
+          url: ${{ env.STAGING_PYX_UPLOAD_URL }}
 
       - name: Checkout sampleproject
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -335,6 +335,63 @@ jobs:
           UV_PUBLISH_URL: ${{ steps.auth.outputs.url }}
           UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}
 
+  selftest-publish-e2e-production:
+    name: "Test: end-to-end publish against production pyx"
+    if: |-
+      ${{
+          github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
+          github.event_name == 'push'
+       }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for testing the action itself
+      contents: read # for private repos
+
+    environment: test
+
+    env:
+      PYX_API_URL: https://api.pyx.dev
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: setup uv
+        uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0
+
+      - uses: ./
+        id: auth
+        with:
+          workspace: astral-test
+          registry: main
+
+      - name: Checkout sampleproject
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          repository: pypa/sampleproject
+          path: sampleproject
+          persist-credentials: false
+
+      - name: Prep sampleproject
+        working-directory: sampleproject
+        run: |
+          stamp=$(date +%s)
+          rand=$(od -A n -t u -N 3 /dev/urandom | tr -d ' ')
+          version="4.0.${stamp}.${rand}"
+
+          # Replace the version in pyproject.toml
+          sed -i "s/^version = \".*\"/version = \"${version}\"/" pyproject.toml
+
+      - name: Build and publish package
+        run: |
+          uv build
+          uv publish
+        working-directory: sampleproject
+        env:
+          UV_PUBLISH_URL: ${{ steps.auth.outputs.url }}
+          UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}
+
   all-tests-pass:
     name: "Ensure all selftests pass"
     if: always()
@@ -349,6 +406,7 @@ jobs:
       - selftest-inputs-mutex-xfail
       - selftest-publish-e2e
       - selftest-publish-e2e-workspace-default-registry
+      - selftest-publish-e2e-production
 
     runs-on: ubuntu-latest
 

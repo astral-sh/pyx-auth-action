@@ -418,7 +418,7 @@ jobs:
         continue-on-error: true
         with:
           # Invalid: needs to be the actual upload URL, not the API base URL.
-          upload-url: ${{ env.PYX_API_URL }}
+          url: ${{ env.PYX_API_URL }}
 
       - name: Check failure
         run: |

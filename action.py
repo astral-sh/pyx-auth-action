@@ -400,7 +400,9 @@ def _main() -> None:
 
         # We're looking for a `[[tool.uv.index]]` section with a matching name.
         indices = pyproject.get("tool", {}).get("uv", {}).get("index", [])
-        if not (index := next((i for i in indices if i.get("name") == index), None)):
+        if not (
+            index_dict := next((i for i in indices if i.get("name") == index), None)
+        ):
             details = dedent(
                 """
                 The `pyproject.toml` does not contain an index named '{index}'.
@@ -421,7 +423,7 @@ def _main() -> None:
 
             _die(f"Index '{index}' not found in pyproject.toml", details=details)
 
-        if not (upload_url := index.get("publish-url")):
+        if not (upload_url := index_dict.get("publish-url")):
             details = dedent(
                 """
                 The '{index}' group in `pyproject.toml` does not have a 'publish-url' field.

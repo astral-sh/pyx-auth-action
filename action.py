@@ -31,11 +31,13 @@ a network issue or service outage.
 
 For additional information on pyx's status, please see:
 
-    https://pyx-status.com
+<https://pyx-status.com>
 
 Error information:
 
-    {error}
+```
+{error}
+```
 """
 
 _REQUEST_PAYLOAD_ERROR = """
@@ -46,11 +48,13 @@ bug in pyx, or a service issue.
 
 For additional information on pyx's status, please see:
 
-    https://pyx-status.com
+https://pyx-status.com
 
 Error information:
 
-    {error}
+```
+{error}
+```
 """
 
 
@@ -61,9 +65,14 @@ pyx encountered an error while responding to our request.
 
 Error information:
 
-    Error code: {status_code}
-    Error message: {title}
-    Details: {details}
+- Error code: `{status_code}`
+- Error message: `{title}`
+
+Details:
+
+```
+{details}
+```
 """
 
 _BAD_UPLOAD_URL = """
@@ -73,9 +82,8 @@ The upload URL was: {url}
 
 Upload URLs must be in one of the following formats:
 
-    Default registry: https://api.pyx.dev/upload/v1/WORKSPACE
-
-    Explicit registry: https://api.pyx.dev/upload/v1/WORKSPACE/REGISTRY
+- Default registry: `https://api.pyx.dev/upload/v1/WORKSPACE`
+- Explicit registry: `https://api.pyx.dev/upload/v1/WORKSPACE/REGISTRY`
 """
 
 
@@ -86,7 +94,9 @@ This typically indicates an outage or service issue within GitHub Actions.
 
 Error information:
 
-    {error}
+```
+{error}
+```
 """
 
 _OIDC_MISSING_TOKEN = """
@@ -96,13 +106,13 @@ This typically indicates a misconfiguration in your GitHub Actions workflow.
 
 Please ensure that:
 
-    - Your publishing job has the `id-token: write` permission enabled.
+- Your publishing job has the `id-token: write` permission enabled.
 
-    - Your publishing job is triggered from a workflow that allows access
-      to the OIDC credential.
+- Your publishing job is triggered from a workflow that allows access
+  to the OIDC credential.
 
-      Specifically, access to the OIDC credential is **NOT** allowed
-      from third-party `pull_request` events.
+  Specifically, access to the OIDC credential is **NOT** allowed
+  from third-party `pull_request` events.
 """
 
 
@@ -148,8 +158,24 @@ def _error(msg: str, detail: str | None = None) -> None:
         print(detail, file=sys.stderr)
 
 
+def _summary(msg: str, detail: str | None = None) -> None:
+    """
+    Dump a summary message to the `GITHUB_STEP_SUMMARY` file, if present.
+    """
+    github_summary = os.getenv("GITHUB_STEP_SUMMARY")
+    if not github_summary:
+        return
+
+    with Path(github_summary).open("a", encoding="utf-8") as summary:
+        print(f"## {msg}", file=summary)
+        if detail:
+            print("", file=summary)
+            print(detail, file=summary)
+
+
 def _die(msg: str, detail: str | None = None) -> NoReturn:
     _error(msg, detail)
+    _summary(msg, detail)
     exit(1)
 
 

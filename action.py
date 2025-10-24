@@ -79,6 +79,33 @@ Upload URLs must be in one of the following formats:
 """
 
 
+_OIDC_DISCOVERY_FAILURE = """
+OIDC credential discovery failed.
+
+This typically indicates an outage or service issue within GitHub Actions.
+
+Error information:
+
+    {error}
+"""
+
+_OIDC_MISSING_TOKEN = """
+OIDC credential discovery did not produce a token.
+
+This typically indicates a misconfiguration in your GitHub Actions workflow.
+
+Please ensure that:
+
+    - Your publishing job has the `id-token: write` permission enabled.
+
+    - Your publishing job is triggered from a workflow that allows access
+      to the OIDC credential.
+
+      Specifically, access to the OIDC credential is **NOT** allowed
+      from third-party `pull_request` events.
+"""
+
+
 class Problem(msgspec.Struct):
     type: str = "about:blank"
     status: int | None = None
@@ -273,13 +300,13 @@ def _exchange(url: URIReference) -> str:
     try:
         id_token = detect_credential(audience=audience)
     except Exception as e:
-        _die(f"Failed to obtain ambient OIDC token: {e}")
+        # These are hard errors, i.e. failures within GitHub itself and
+        # not a misconfiguration on the user's part.
+        detail = _OIDC_DISCOVERY_FAILURE.format(error=str(e))
+        _die("Failed to discover ambient OIDC token", detail=detail)
 
     if not id_token:
-        # TODO(ww): Emit more useful diagnostics to the user;
-        # specifically, they probably forgot to enable `id-token: write`
-        # or are running from a trigger that doesn't allow OIDC.
-        _die("No ambient OIDC token available")
+        _die("No ambient OIDC token available", detail=_OIDC_MISSING_TOKEN)
 
     # Exchange the OIDC token for a registry token.
     try:

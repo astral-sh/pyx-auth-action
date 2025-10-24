@@ -177,7 +177,7 @@ def _request[T: msgspec.Struct](
         raise ValueError(detail)
 
     try:
-        payload = msgspec.json.decode(resp.data, type=T)
+        payload = msgspec.json.decode(resp.data, type=response)
     except Exception as e:
         detail = _REQUEST_PAYLOAD_ERROR.format(url=url, error=str(e))
         raise ValueError(detail)

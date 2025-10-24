@@ -12,13 +12,97 @@ import os
 import sys
 from pathlib import Path
 from time import perf_counter
-from typing import NoReturn
+from typing import Literal, NoReturn, Self
+from http.client import responses
 
 import msgspec.json
 import tomllib
 import urllib3
 from id import detect_credential
 from rfc3986 import URIReference, builder, uri_reference, validators
+from urllib3.response import BaseHTTPResponse
+
+_REQUEST_FAILURE_ERROR = """
+Our request to {url} failed.
+
+This error occurred while making the request, before the server
+could respond with an appropriate HTTP response. This strongly suggests
+a network issue or service outage.
+
+For additional information on pyx's status, please see:
+
+    https://pyx-status.com
+
+Error information:
+
+    {error}
+"""
+
+_REQUEST_PAYLOAD_ERROR = """
+Our request to {url} succeeded, but produced an unexpected response.
+
+The response was not in the expected format. This could be due to a
+bug in pyx, or a service issue.
+
+For additional information on pyx's status, please see:
+
+    https://pyx-status.com
+
+Error information:
+
+    {error}
+"""
+
+
+_REQUEST_PROBLEM_ERROR = """
+Our request to {url} failed.
+
+pyx encountered an error while responding to our request.
+
+Error information:
+
+    Error code: {status_code}
+    Error message: {title}
+    Details: {details}
+"""
+
+_BAD_UPLOAD_URL = """
+Token minting failed due to a bad upload URL.
+
+The upload URL was: {url}
+
+Upload URLs must be in one of the following formats:
+
+    Default registry: https://api.pyx.dev/upload/v1/WORKSPACE
+
+    Explicit registry: https://api.pyx.dev/upload/v1/WORKSPACE/REGISTRY
+"""
+
+
+class Problem(msgspec.Struct, frozen=True):
+    type: str = "about:blank"
+    status: int | None = None
+    title: str | None = None
+    detail: str | None = None
+    instance: str | None = None
+
+    def from_response(resp: BaseHTTPResponse) -> Self:
+        assert resp.status != 200, "Unexpected status code"
+
+        try:
+            problem = msgspec.json.decode(resp.data, type=Problem)
+            # Refine the problem with the response's status code
+            # default title, if not present.
+            problem.status = problem.status or resp.status
+            problem.title = problem.title or responses.get(resp.status, "Unknown Error")
+        except Exception as e:
+            problem = Problem(
+                status=resp.status,
+                title="Unknown Error",
+                detail=str(e),
+            )
+
+        return problem
 
 
 def _debug(msg: str) -> None:
@@ -29,13 +113,16 @@ def _info(msg: str) -> None:
     print(f"::notice::{msg}")
 
 
-def _error(msg: str) -> None:
-    print(f"Error: {msg}", file=sys.stderr)
+def _error(msg: str, detail: str | None = None) -> None:
     print(f"::error::{msg}")
+    print(f"Error: {msg}", file=sys.stderr)
+
+    if detail:
+        print(detail, file=sys.stderr)
 
 
-def _die(msg: str) -> NoReturn:
-    _error(msg)
+def _die(msg: str, detail: str | None = None) -> NoReturn:
+    _error(msg, detail)
     exit(1)
 
 
@@ -63,6 +150,41 @@ def _set_output(name: str, value: str) -> None:
         print(f"{name}={value}", file=output)
 
 
+def _request[T: msgspec.Struct](
+    method: Literal["GET", "POST"], url: str, response: type[T]
+) -> T:
+    """
+    Make an HTTP request to the given URL and return the response body
+    parsed as the given type.
+
+    This wraps `urllib3.request` handle RFC 9457 problem responses.
+    """
+
+    try:
+        resp = urllib3.request(method, url)
+    except Exception as e:
+        detail = _REQUEST_FAILURE_ERROR.format(url=url, error=str(e))
+        raise ValueError(detail)
+
+    if resp.status != 200:
+        problem = Problem.from_response(resp)
+        detail = _REQUEST_PROBLEM_ERROR.format(
+            url=url,
+            status_code=problem.status_code,
+            title=problem.title,
+            details=problem.detail,
+        )
+        raise ValueError(detail)
+
+    try:
+        payload = msgspec.json.decode(resp.data, type=T)
+    except Exception as e:
+        detail = _REQUEST_PAYLOAD_ERROR.format(url=url, error=str(e))
+        raise ValueError(detail)
+
+    return payload
+
+
 def _get_audience(url: URIReference) -> str:
     """
     Given a pyx registry upload URL, determine the audience retrieval
@@ -77,22 +199,10 @@ def _get_audience(url: URIReference) -> str:
 
     _debug(f"Using audience URL: {audience_url}")
 
-    try:
-        audience_resp = urllib3.request("GET", audience_url)
-    except Exception as e:
-        raise ValueError(f"Failed to fetch audience URL: {e}") from e
-
-    if audience_resp.status != 200:
-        raise ValueError(f"Audience URL returned HTTP {audience_resp.status}")
-
     class AudienceResponse(msgspec.Struct, frozen=True):
         audience: str
 
-    try:
-        audience = msgspec.json.decode(audience_resp.data, type=AudienceResponse)
-    except Exception as e:
-        raise ValueError(f"Failed to parse audience response: {e}") from e
-
+    audience = _request("GET", audience_url, AudienceResponse)
     return audience.audience
 
 
@@ -114,7 +224,8 @@ def _mint_token(url: URIReference, id_token: str) -> str:
         case ["", "v1", "upload", workspace]:
             registry_name = None
         case _:
-            raise ValueError(f"Unexpected upload URL path: {path}")
+            detail = _BAD_UPLOAD_URL.format(url=url)
+            raise ValueError(detail)
 
     if registry_name:
         mint_url = url.copy_with(
@@ -131,30 +242,14 @@ def _mint_token(url: URIReference, id_token: str) -> str:
 
     _debug(f"Using token mint URL: {mint_url}")
 
-    # Perform the token minting request.
-    try:
-        mint_resp = urllib3.request(
-            "POST",
-            mint_url,
-            json={"token": id_token},
-        )
-    except Exception as e:
-        raise ValueError(f"Failed to mint token: {e}") from e
-
-    if mint_resp.status != 200:
-        raise ValueError(f"Token minting returned HTTP {mint_resp.status}:")
-
     class MintResponse(msgspec.Struct, frozen=True):
         token: str
         expires: int
 
-    try:
-        mint_data = msgspec.json.decode(mint_resp.data, type=MintResponse)
-    except Exception as e:
-        raise ValueError(f"Failed to parse mint response: {e}") from e
+    mint_resp = _request("POST", mint_url, MintResponse)
 
-    _add_mask(mint_data.token)
-    return mint_data.token
+    _add_mask(mint_resp.token)
+    return mint_resp.token
 
 
 def _exchange(url: URIReference) -> str:
@@ -167,8 +262,8 @@ def _exchange(url: URIReference) -> str:
     # Get the registry's expected audience.
     try:
         audience = _get_audience(url)
-    except Exception as e:
-        _die(f"Failed to get audience from registry: {e}")
+    except ValueError as e:
+        _die("Failed to retrieve expected audience from registry", detail=str(e))
 
     # Obtain an ambient OIDC token.
     try:
@@ -186,7 +281,7 @@ def _exchange(url: URIReference) -> str:
     try:
         return _mint_token(url, id_token)
     except Exception as e:
-        _die(f"Failed to mint registry token: {e}")
+        _die("Failed to mint registry token", detail=str(e))
 
 
 def _main() -> None:

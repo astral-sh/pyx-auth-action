@@ -170,7 +170,7 @@ def _request[T: msgspec.Struct](
         problem = Problem.from_response(resp)
         detail = _REQUEST_PROBLEM_ERROR.format(
             url=url,
-            status_code=problem.status_code,
+            status_code=problem.status,
             title=problem.title,
             details=problem.detail,
         )

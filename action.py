@@ -79,7 +79,7 @@ Upload URLs must be in one of the following formats:
 """
 
 
-class Problem(msgspec.Struct, frozen=True):
+class Problem(msgspec.Struct):
     type: str = "about:blank"
     status: int | None = None
     title: str | None = None

@@ -11,6 +11,7 @@
 import os
 import sys
 from pathlib import Path
+from textwrap import dedent
 from time import perf_counter
 from typing import Literal, NoReturn, Self
 from http.client import responses
@@ -115,6 +116,12 @@ Please ensure that:
   from third-party `pull_request` events.
 """
 
+_BAD_PYPROJECT = """
+Failed to determine an upload URL from the `pyproject.toml`.
+
+{details}
+"""
+
 
 class Problem(msgspec.Struct):
     type: str = "about:blank"
@@ -158,7 +165,7 @@ def _error(msg: str, detail: str | None = None) -> None:
         print(detail, file=sys.stderr)
 
 
-def _summary(msg: str, detail: str | None = None) -> None:
+def _summary(msg: str, details: str | None = None) -> None:
     """
     Dump a summary message to the `GITHUB_STEP_SUMMARY` file, if present.
     """
@@ -168,14 +175,14 @@ def _summary(msg: str, detail: str | None = None) -> None:
 
     with Path(github_summary).open("a", encoding="utf-8") as summary:
         print(f"## {msg}", file=summary)
-        if detail:
+        if details:
             print("", file=summary)
-            print(detail, file=summary)
+            print(details, file=summary)
 
 
-def _die(msg: str, detail: str | None = None) -> NoReturn:
-    _error(msg, detail)
-    _summary(msg, detail)
+def _die(msg: str, details: str | None = None) -> NoReturn:
+    _error(msg, details)
+    _summary(msg, details)
     exit(1)
 
 
@@ -320,7 +327,7 @@ def _exchange(url: URIReference) -> str:
     try:
         audience = _get_audience(url)
     except ValueError as e:
-        _die("Failed to retrieve expected audience from registry", detail=str(e))
+        _die("Failed to retrieve expected audience from registry", details=str(e))
 
     # Obtain an ambient OIDC token.
     try:
@@ -329,10 +336,10 @@ def _exchange(url: URIReference) -> str:
         # These are hard errors, i.e. failures within GitHub itself and
         # not a misconfiguration on the user's part.
         detail = _OIDC_DISCOVERY_FAILURE.format(error=str(e))
-        _die("Failed to discover ambient OIDC token", detail=detail)
+        _die("Failed to discover ambient OIDC token", details=detail)
 
     if not id_token:
-        _die("No ambient OIDC token available", detail=_OIDC_MISSING_TOKEN)
+        _die("No ambient OIDC token available", details=_OIDC_MISSING_TOKEN)
 
     # Exchange the OIDC token for a registry token.
     try:
@@ -341,7 +348,7 @@ def _exchange(url: URIReference) -> str:
         # TODO(ww): We could probably specialize the error a bit further here,
         # e.g. offer tips on misconfiguration by inspecting the OIDC token's
         # claims.
-        _die("Failed to mint registry token", detail=str(e))
+        _die("Failed to mint registry token", details=str(e))
 
 
 def _main() -> None:
@@ -363,22 +370,84 @@ def _main() -> None:
                 Path("pyproject.toml").read_text(encoding="utf-8")
             )
         except FileNotFoundError:
-            _die(f"Can't discover upload URL for {index}: pyproject.toml not found")
-        except Exception as e:
+            details = _BAD_PYPROJECT.format(
+                details="Could not find `pyproject.toml` in the current directory."
+            )
             _die(
-                f"Can't discover upload URL for {index}: Failed to parse pyproject.toml: {e}"
+                f"Can't discover upload URL for {index}: pyproject.toml not found",
+                details=details,
+            )
+        except Exception as e:
+            details = dedent(
+                """
+                An error occurred while parsing `pyproject.toml`.
+
+                Ensure that `pyproject.toml` is a well-formed TOML file.
+
+                Details:
+
+                ```
+                {error}
+                ```
+                """
+            ).format(error=str(e))
+            details = _BAD_PYPROJECT.format(details=details)
+
+            _die(
+                f"Can't discover upload URL for {index}: invalid pyproject.toml",
+                details=details,
             )
 
         # We're looking for a `[[tool.uv.index]]` section with a matching name.
         indices = pyproject.get("tool", {}).get("uv", {}).get("index", [])
         if not (index := next((i for i in indices if i.get("name") == index), None)):
-            _die(f"Index '{index}' not found in pyproject.toml")
+            details = dedent(
+                """
+                The `pyproject.toml` does not contain an index named '{index}'.
+
+                Ensure that your `pyproject.toml` contains a section like the following:
+
+                ```toml
+                [[tool.uv.index]]
+                name = "{index}"
+                url = "https://api.pyx.dev/simple/WORKSPACE/REGISTRY"
+                publish-url = "https://api.pyx.dev/upload/v1/WORKSPACE/REGISTRY"
+                ```
+
+                For more information, see: <https://docs.pyx.dev/publishing#publishing-with-an-authenticated-client>
+                """
+            ).format(index=index)
+            details = _BAD_PYPROJECT.format(details=details)
+
+            _die(f"Index '{index}' not found in pyproject.toml", details=details)
 
         if not (upload_url := index.get("publish-url")):
-            _die(f"Index '{index}' does not have a 'publish-url'")
+            details = dedent(
+                """
+                The '{index}' group in `pyproject.toml` does not have a 'publish-url' field.
+
+                You must specify a 'publish-url' field to enable publishing.
+
+                For more information, see: <https://docs.pyx.dev/publishing#publishing-with-an-authenticated-client>
+                """
+            ).format(index=index)
+            details = _BAD_PYPROJECT.format(details=details)
+
+            _die(f"Index '{index}' does not have a 'publish-url'", details=details)
 
         if not isinstance(upload_url, str):
-            _die(f"Index '{index}' has an invalid 'publish-url'")
+            details = dedent(
+                """
+                The '{index}' group in 'pyproject.toml' has an invalid 'publish-url' field.
+
+                The 'publish-url' field must be a string.
+
+                For more information, see: <https://docs.pyx.dev/publishing#publishing-with-an-authenticated-client>
+                """
+            ).format(index=index)
+            details = _BAD_PYPROJECT.format(details=details)
+
+            _die(f"Index '{index}' has an invalid 'publish-url'", details=details)
     elif raw_url:
         upload_url = raw_url
     else:
@@ -405,7 +474,7 @@ def _main() -> None:
         validator.validate(url)
     except Exception as _:
         detail = _BAD_UPLOAD_URL.format(url=upload_url)
-        _die(f"Invalid upload URL: {upload_url}", detail=detail)
+        _die(f"Invalid upload URL: {upload_url}", details=detail)
 
     start = perf_counter()
     token = _exchange(url)

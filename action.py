@@ -228,7 +228,7 @@ def _mint_token(url: URIReference, id_token: str) -> str:
         case ["", "v1", "upload", workspace]:
             registry_name = None
         case _:
-            detail = _BAD_UPLOAD_URL.format(url=url)
+            detail = _BAD_UPLOAD_URL.format(url=url.unsplit())
             raise ValueError(detail)
 
     if registry_name:
@@ -336,11 +336,7 @@ def _main() -> None:
 
     _debug(f"Using upload URL: {upload_url}")
 
-    try:
-        url = uri_reference(upload_url).normalize()
-    except Exception as _:
-        detail = _BAD_UPLOAD_URL.format(url=upload_url)
-        _die(f"Invalid upload URL: {upload_url}", detail=detail)
+    url = uri_reference(upload_url).normalize()
 
     validator = (
         validators.Validator()
@@ -351,8 +347,9 @@ def _main() -> None:
 
     try:
         validator.validate(url)
-    except Exception as e:
-        _die(f"Invalid URL '{raw_url}': {e}")
+    except Exception as _:
+        detail = _BAD_UPLOAD_URL.format(url=upload_url)
+        _die(f"Invalid upload URL: {upload_url}", detail=detail)
 
     start = perf_counter()
     token = _exchange(url)

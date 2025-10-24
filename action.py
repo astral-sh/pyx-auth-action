@@ -336,7 +336,11 @@ def _main() -> None:
 
     _debug(f"Using upload URL: {upload_url}")
 
-    url = uri_reference(upload_url).normalize()
+    try:
+        url = uri_reference(upload_url).normalize()
+    except Exception as _:
+        detail = _BAD_UPLOAD_URL.format(url=upload_url)
+        _die(f"Invalid upload URL: {upload_url}", detail=detail)
 
     validator = (
         validators.Validator()

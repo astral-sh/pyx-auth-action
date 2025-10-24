@@ -393,6 +393,42 @@ jobs:
           UV_PUBLISH_URL: ${{ steps.auth.outputs.url }}
           UV_PUBLISH_TOKEN: ${{ steps.auth.outputs.token }}
 
+  selftest-bad-upload-url-xfail:
+    name: "Test: expect failure when using invalid upload URL"
+    if: |-
+      ${{
+          github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
+          github.event_name == 'push'
+       }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # for testing the action itself
+      contents: read # for private repos
+
+    environment: test
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Expect failure when using invalid upload URL
+        uses: ./
+        id: auth
+        continue-on-error: true
+        with:
+          # Invalid: needs to be the actual upload URL, not the API base URL.
+          upload-url: ${{ env.PYX_API_URL }}
+
+      - name: Check failure
+        run: |
+          if [ "${OUTCOME}" != "failure" ]; then
+            echo "Expected failure, got '${OUTCOME}'"
+            exit 1
+          fi
+        env:
+          OUTCOME: ${{ steps.auth.outcome }}
+
   all-tests-pass:
     name: "Ensure all selftests pass"
     if: always()
@@ -408,6 +444,7 @@ jobs:
       - selftest-publish-e2e
       - selftest-publish-e2e-workspace-default-registry
       - selftest-publish-e2e-production
+      - selftest-bad-upload-url-xfail
 
     runs-on: ubuntu-latest
 

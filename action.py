@@ -151,7 +151,11 @@ def _set_output(name: str, value: str) -> None:
 
 
 def _request[T: msgspec.Struct](
-    method: Literal["GET", "POST"], url: str, response: type[T]
+    response: type[T],
+    method: Literal["GET", "POST"],
+    url: str,
+    *,
+    json: dict | None = None,
 ) -> T:
     """
     Make an HTTP request to the given URL and return the response body
@@ -161,7 +165,7 @@ def _request[T: msgspec.Struct](
     """
 
     try:
-        resp = urllib3.request(method, url)
+        resp = urllib3.request(method, url, json=json)
     except Exception as e:
         detail = _REQUEST_FAILURE_ERROR.format(url=url, error=str(e))
         raise ValueError(detail)
@@ -202,7 +206,7 @@ def _get_audience(url: URIReference) -> str:
     class AudienceResponse(msgspec.Struct, frozen=True):
         audience: str
 
-    audience = _request("GET", audience_url, AudienceResponse)
+    audience = _request(AudienceResponse, "GET", audience_url)
     return audience.audience
 
 
@@ -246,7 +250,7 @@ def _mint_token(url: URIReference, id_token: str) -> str:
         token: str
         expires: int
 
-    mint_resp = _request("POST", mint_url, MintResponse)
+    mint_resp = _request(MintResponse, "POST", mint_url, json={"token": id_token})
 
     _add_mask(mint_resp.token)
     return mint_resp.token

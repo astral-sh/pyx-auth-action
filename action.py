@@ -312,6 +312,9 @@ def _exchange(url: URIReference) -> str:
     try:
         return _mint_token(url, id_token)
     except Exception as e:
+        # TODO(ww): We could probably specialize the error a bit further here,
+        # e.g. offer tips on misconfiguration by inspecting the OIDC token's
+        # claims.
         _die("Failed to mint registry token", detail=str(e))
 
 

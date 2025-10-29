@@ -35,7 +35,8 @@ jobs:
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
-          github.event_name == 'push'
+          github.event_name == 'push' ||
+          github.event_name == 'workflow_dispatch'
        }}
     runs-on: ubuntu-latest
     permissions:
@@ -70,7 +71,8 @@ jobs:
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
-          github.event_name == 'push'
+          github.event_name == 'push' ||
+          github.event_name == 'workflow_dispatch'
        }}
     runs-on: ubuntu-latest
     permissions:
@@ -104,7 +106,8 @@ jobs:
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
-          github.event_name == 'push'
+          github.event_name == 'push' ||
+          github.event_name == 'workflow_dispatch'
        }}
     runs-on: ubuntu-latest
     permissions:
@@ -129,7 +132,8 @@ jobs:
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
-          github.event_name == 'push'
+          github.event_name == 'push' ||
+          github.event_name == 'workflow_dispatch'
        }}
     runs-on: ubuntu-latest
     permissions:
@@ -153,7 +157,8 @@ jobs:
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
-          github.event_name == 'push'
+          github.event_name == 'push' ||
+          github.event_name == 'workflow_dispatch'
        }}
     runs-on: ubuntu-latest
     permissions:
@@ -198,7 +203,8 @@ jobs:
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
-          github.event_name == 'push'
+          github.event_name == 'push' ||
+          github.event_name == 'workflow_dispatch'
        }}
     runs-on: ubuntu-latest
     permissions:
@@ -235,7 +241,8 @@ jobs:
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
-          github.event_name == 'push'
+          github.event_name == 'push' ||
+          github.event_name == 'workflow_dispatch'
        }}
     runs-on: ubuntu-latest
     permissions:
@@ -288,7 +295,8 @@ jobs:
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
-          github.event_name == 'push'
+          github.event_name == 'push' ||
+          github.event_name == 'workflow_dispatch'
        }}
     runs-on: ubuntu-latest
     permissions:
@@ -341,7 +349,8 @@ jobs:
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
-          github.event_name == 'push'
+          github.event_name == 'push' ||
+          github.event_name == 'workflow_dispatch'
        }}
     runs-on: ubuntu-latest
     permissions:
@@ -398,7 +407,8 @@ jobs:
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
-          github.event_name == 'push'
+          github.event_name == 'push' ||
+          github.event_name == 'workflow_dispatch'
        }}
     runs-on: ubuntu-latest
     permissions:
@@ -434,7 +444,8 @@ jobs:
     if: |-
       ${{
           github.event.pull_request.head.repo.full_name == 'astral-sh/pyx-auth-action' ||
-          github.event_name == 'push'
+          github.event_name == 'push' ||
+          github.event_name == 'workflow_dispatch'
        }}
     runs-on: ubuntu-latest
     permissions:

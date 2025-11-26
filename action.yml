@@ -50,7 +50,7 @@ runs:
     - name: exchange
       id: exchange
       run: |
-        uv run --script "${GITHUB_ACTION_PATH}/action.py"
+        uv run --locked --project "${GITHUB_ACTION_PATH}" "${GITHUB_ACTION_PATH}/action.py"
       shell: bash
       env:
         GHA_PYX_INPUT_INDEX: ${{ inputs.index }}

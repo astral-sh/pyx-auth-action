@@ -1,23 +1,13 @@
-# /// script
-# requires-python = ">=3.13, <3.14"
-# dependencies = [
-#     "id",
-#     "msgspec>=0.19.0",
-#     "rfc3986>=2.0.0",
-#     "urllib3",
-# ]
-# ///
-
 import os
 import sys
+import tomllib
+from http.client import responses
 from pathlib import Path
 from textwrap import dedent
 from time import perf_counter
-from typing import Literal, NoReturn, Self
-from http.client import responses
+from typing import Literal, NoReturn
 
 import msgspec.json
-import tomllib
 import urllib3
 from id import detect_credential
 from rfc3986 import URIReference, builder, uri_reference, validators
@@ -130,7 +120,8 @@ class Problem(msgspec.Struct):
     detail: str | None = None
     instance: str | None = None
 
-    def from_response(resp: BaseHTTPResponse) -> Self:
+    @classmethod
+    def from_response(cls, resp: BaseHTTPResponse) -> "Problem":
         assert resp.status != 200, "Unexpected status code"
 
         try:
@@ -490,18 +481,3 @@ def _main() -> None:
 
 if __name__ == "__main__":
     _main()
-
-# TESTS
-
-
-def setup_module():
-    global pytest
-    import pytest
-
-
-def test_get_audience():
-    api_base = builder.URIBuilder().from_uri("https://api.pyx.dev").finalize()
-
-    aud = _get_audience(api_base)
-
-    assert aud == "pyx"

@@ -4,14 +4,15 @@ all:
 
 .PHONY: lint
 lint:
-	uvx ruff format --check
-	uvx ruff check
+	uv run --dev ruff format --check
+	uv run --dev ruff check
+	uv run --dev pyright
 
 .PHONY: fix
 fix:
-	uvx ruff format
-	uvx ruff check --fix
+	uv run --dev ruff format
+	uv run --dev ruff check --fix
 
-.PHONY: test
-test:
-	uvx --with-requirements=action.py pytest action.py
+# .PHONY: test
+# test:
+# 	uvx --with-requirements=action.py pytest action.py

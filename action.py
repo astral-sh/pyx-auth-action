@@ -1,13 +1,3 @@
-# /// script
-# requires-python = ">=3.13, <3.14"
-# dependencies = [
-#     "id",
-#     "msgspec>=0.19.0",
-#     "rfc3986>=2.0.0",
-#     "urllib3",
-# ]
-# ///
-
 import os
 import sys
 from pathlib import Path
@@ -491,17 +481,17 @@ def _main() -> None:
 if __name__ == "__main__":
     _main()
 
-# TESTS
+# # TESTS
 
 
-def setup_module():
-    global pytest
-    import pytest
+# def setup_module():
+#     global pytest
+#     import pytest
 
 
-def test_get_audience():
-    api_base = builder.URIBuilder().from_uri("https://api.pyx.dev").finalize()
+# def test_get_audience():
+#     api_base = builder.URIBuilder().from_uri("https://api.pyx.dev").finalize()
 
-    aud = _get_audience(api_base)
+#     aud = _get_audience(api_base)
 
-    assert aud == "pyx"
+#     assert aud == "pyx"

@@ -4,11 +4,11 @@ version = "0.0.4"
 description = "Get a temporary access token to a pyx registry with Trusted Publishing."
 readme = "README.md"
 dependencies = ["id", "msgspec>=0.19.0", "rfc3986>=2.0.0", "urllib3"]
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 classifiers = [
     # This is a GitHub Action, not a PyPI package.
     "Private :: Do Not Upload",
 ]
 
 [dependency-groups]
-dev = ["pyright>=1.1.407", "pytest>=9.0.1", "requests>=2.32.5", "ruff>=0.14.6"]
+dev = ["pyright>=1.1.407", "pytest>=9.0.1", "ruff>=0.14.6"]

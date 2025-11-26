@@ -1,13 +1,13 @@
 import os
 import sys
+import tomllib
+from http.client import responses
 from pathlib import Path
 from textwrap import dedent
 from time import perf_counter
-from typing import Literal, NoReturn, Self
-from http.client import responses
+from typing import Literal, NoReturn
 
 import msgspec.json
-import tomllib
 import urllib3
 from id import detect_credential
 from rfc3986 import URIReference, builder, uri_reference, validators
@@ -120,7 +120,8 @@ class Problem(msgspec.Struct):
     detail: str | None = None
     instance: str | None = None
 
-    def from_response(resp: BaseHTTPResponse) -> Self:
+    @classmethod
+    def from_response(cls, resp: BaseHTTPResponse) -> "Problem":
         assert resp.status != 200, "Unexpected status code"
 
         try:
@@ -480,4 +481,3 @@ def _main() -> None:
 
 if __name__ == "__main__":
     _main()
-

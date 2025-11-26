@@ -481,17 +481,3 @@ def _main() -> None:
 if __name__ == "__main__":
     _main()
 
-# # TESTS
-
-
-# def setup_module():
-#     global pytest
-#     import pytest
-
-
-# def test_get_audience():
-#     api_base = builder.URIBuilder().from_uri("https://api.pyx.dev").finalize()
-
-#     aud = _get_audience(api_base)
-
-#     assert aud == "pyx"

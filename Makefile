@@ -13,6 +13,6 @@ fix:
 	uv run --dev ruff format
 	uv run --dev ruff check --fix
 
-# .PHONY: test
-# test:
-# 	uvx --with-requirements=action.py pytest action.py
+.PHONY: test
+test:
+	uv run --dev pytest -s -o log_cli=true -o log_cli_level=DEBUG test.py

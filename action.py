@@ -71,10 +71,11 @@ Token minting failed due to a bad upload URL.
 
 The upload URL was: {url}
 
-Upload URLs must be in one of the following formats:
+Upload URLs must be in the following format:
 
-- Default registry: `https://api.pyx.dev/upload/v1/WORKSPACE`
-- Explicit registry: `https://api.pyx.dev/upload/v1/WORKSPACE/REGISTRY`
+```
+https://api.pyx.dev/upload/v1/WORKSPACE/REGISTRY
+```
 """
 
 
@@ -269,31 +270,21 @@ def _mint_token(url: URIReference, id_token: str) -> str:
     path: str = url.path
 
     # We expect a path like `/v1/upload/{workspace_name}/{registry_name}`
-    # or `/v1/upload/{workspace_name}` for the default registry.
     # We need to extract the workspace name and registry name (if any)
     # so that we can construct the token minting URL.
     parts = path.split("/")
     match parts:
         case ["", "v1", "upload", workspace, registry]:
             registry_name = registry
-        case ["", "v1", "upload", workspace]:
-            registry_name = None
         case _:
             detail = _BAD_UPLOAD_URL.format(url=url.unsplit())
             raise ValueError(detail)
 
-    if registry_name:
-        mint_url = url.copy_with(
-            path=f"/v1/trusted-publishing/{workspace}/{registry_name}/mint-token",
-            query=None,
-            fragment=None,
-        ).unsplit()
-    else:
-        mint_url = url.copy_with(
-            path=f"/v1/trusted-publishing/{workspace}/mint-token",
-            query=None,
-            fragment=None,
-        ).unsplit()
+    mint_url = url.copy_with(
+        path=f"/v1/trusted-publishing/{workspace}/{registry_name}/mint-token",
+        query=None,
+        fragment=None,
+    ).unsplit()
 
     _debug(f"Using token mint URL: {mint_url}")
 
@@ -444,11 +435,15 @@ def _main() -> None:
     elif raw_url:
         upload_url = raw_url
     else:
-        wip = builder.URIBuilder().from_uri(api_base)
-        if registry:
-            wip = wip.add_path(f"/v1/upload/{workspace}/{registry}")
-        else:
-            wip = wip.add_path(f"/v1/upload/{workspace}")
+        if not registry:
+            # NOTE: Should be unreachable since we always provide a default registry in action.yml.
+            _die("When specifying 'workspace', 'registry' must also be specified")
+
+        wip = (
+            builder.URIBuilder()
+            .from_uri(api_base)
+            .add_path(f"/v1/upload/{workspace}/{registry}")
+        )
 
         upload_url = wip.finalize().unsplit()
 

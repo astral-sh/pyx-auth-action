@@ -26,6 +26,7 @@ inputs:
 
       Example: main
     required: false
+    default: main
   url:
     description: |
       The upload URL.

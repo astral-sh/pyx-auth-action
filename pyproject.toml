@@ -3,7 +3,13 @@ name = "pyx-auth-action"
 version = "0.0.9"
 description = "Get a temporary access token to a pyx registry with Trusted Publishing."
 readme = "README.md"
-dependencies = ["id", "msgspec>=0.20.0", "rfc3986>=2.0.0", "urllib3"]
+dependencies = [
+    "id",
+    "msgspec>=0.20.0",
+    "packaging>=25.0",
+    "rfc3986>=2.0.0",
+    "urllib3",
+]
 requires-python = ">=3.12"
 classifiers = [
     # This is a GitHub Action, not a PyPI package.

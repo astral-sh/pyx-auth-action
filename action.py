@@ -11,7 +11,7 @@ from typing import Literal, NoReturn
 import msgspec.json
 import urllib3
 from id import detect_credential
-from packaging.version import Version
+from packaging.version import InvalidVersion, Version
 from rfc3986 import URIReference, builder, uri_reference, validators
 from urllib3.response import BaseHTTPResponse
 
@@ -196,10 +196,21 @@ def _check_uv_version():
     )
     if result.returncode != 0:
         # This shouldn't ever really happen since this action setups up uv itself.
+        _warning(
+            "Could not determine uv version; skipping check for Trusted Publishing support",
+        )
         return
 
-    # `uv --version` looks something like `uv X.Y.Z (...)`; we want the `X.Y.Z` part.
-    version = Version(result.stdout.split()[1])
+    try:
+        # `uv --version` looks something like `uv X.Y.Z (...)`; we want the `X.Y.Z` part.
+        version = Version(result.stdout.split()[1])
+    except InvalidVersion:
+        # This should never really happen either.
+        _warning(
+            "Could not parse uv version; skipping check for Trusted Publishing support",
+        )
+        return
+
     if version >= Version("0.9.27"):
         detail = dedent(
             """

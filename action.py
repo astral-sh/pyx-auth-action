@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 import tomllib
 from http.client import responses
@@ -10,6 +11,7 @@ from typing import Literal, NoReturn
 import msgspec.json
 import urllib3
 from id import detect_credential
+from packaging.version import InvalidVersion, Version
 from rfc3986 import URIReference, builder, uri_reference, validators
 from urllib3.response import BaseHTTPResponse
 
@@ -149,6 +151,10 @@ def _info(msg: str) -> None:
     print(f"::notice::{msg}")
 
 
+def _warning(msg: str) -> None:
+    print(f"::warning::{msg}")
+
+
 def _error(msg: str, detail: str | None = None) -> None:
     print(f"::error::{msg}")
     print(f"Error: {msg}", file=sys.stderr)
@@ -176,6 +182,59 @@ def _die(msg: str, details: str | None = None) -> NoReturn:
     _error(msg, details)
     _summary(msg, details)
     exit(1)
+
+
+def _check_uv_version():
+    """
+    Check whether uv is new enough to do this action's job natively.
+    """
+
+    result = subprocess.run(
+        ["uv", "--version"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        # This shouldn't ever really happen since this action setups up uv itself.
+        _warning(
+            "Could not determine uv version; skipping check for Trusted Publishing support",
+        )
+        return
+
+    try:
+        # `uv --version` looks something like `uv X.Y.Z (...)`; we want the `X.Y.Z` part.
+        version = Version(result.stdout.split()[1])
+    except InvalidVersion:
+        # This should never really happen either.
+        _warning(
+            "Could not parse uv version; skipping check for Trusted Publishing support",
+        )
+        return
+
+    if version >= Version("0.9.27"):
+        detail = dedent(
+            """
+            You are using uv version {version}, which has built-in support
+            for Trusted Publishing and does not require this action.
+
+            You can publish directly to your pyx registry with:
+
+            ```bash
+            uv publish --trusted-publishing=always --index=YOUR_INDEX_NAME
+            ```
+
+            For more information, see: <https://docs.pyx.dev/publishing#trusted-publishing>
+            """
+        ).format(version=version)
+
+        _warning(
+            "Your version of uv has built-in Trusted Publishing support, "
+            "see: https://docs.pyx.dev/publishing#trusted-publishing",
+        )
+        _summary(
+            "uv has built-in Trusted Publishing support",
+            details=detail,
+        )
 
 
 def _add_mask(mask: str) -> None:
@@ -334,6 +393,8 @@ def _exchange(url: URIReference) -> str:
 
 
 def _main() -> None:
+    _check_uv_version()
+
     index = _get_input("index")
     workspace = _get_input("workspace")
     registry = _get_input("registry")

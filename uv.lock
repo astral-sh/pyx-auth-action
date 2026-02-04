@@ -219,6 +219,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "id" },
     { name = "msgspec" },
+    { name = "packaging" },
     { name = "rfc3986" },
     { name = "urllib3" },
 ]
@@ -234,6 +235,7 @@ dev = [
 requires-dist = [
     { name = "id" },
     { name = "msgspec", specifier = ">=0.20.0" },
+    { name = "packaging", specifier = ">=25.0" },
     { name = "rfc3986", specifier = ">=2.0.0" },
     { name = "urllib3" },
 ]

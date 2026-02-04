@@ -1,6 +1,6 @@
 [project]
 name = "pyx-auth-action"
-version = "0.0.9"
+version = "0.0.10"
 description = "Get a temporary access token to a pyx registry with Trusted Publishing."
 readme = "README.md"
 dependencies = [

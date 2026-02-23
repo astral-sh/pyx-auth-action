@@ -20,7 +20,7 @@ env:
 jobs:
   unit:
     name: "Test: unit tests"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       contents: read # for private repos
 
@@ -42,7 +42,7 @@ jobs:
           github.event_name == 'push' ||
           github.event_name == 'workflow_dispatch'
        }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       id-token: write # for testing the action itself
       contents: read # for private repos
@@ -78,7 +78,7 @@ jobs:
           github.event_name == 'push' ||
           github.event_name == 'workflow_dispatch'
        }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       id-token: write # for testing the action itself
       contents: read # for private repos
@@ -113,7 +113,7 @@ jobs:
           github.event_name == 'push' ||
           github.event_name == 'workflow_dispatch'
        }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       id-token: write # for testing the action itself
       contents: read # for private repos
@@ -139,7 +139,7 @@ jobs:
           github.event_name == 'push' ||
           github.event_name == 'workflow_dispatch'
        }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       id-token: write # for testing the action itself
       contents: read # for private repos
@@ -164,7 +164,7 @@ jobs:
           github.event_name == 'push' ||
           github.event_name == 'workflow_dispatch'
        }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       id-token: write # for testing the action itself
       contents: read # for private repos
@@ -210,7 +210,7 @@ jobs:
           github.event_name == 'push' ||
           github.event_name == 'workflow_dispatch'
        }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       id-token: write # for testing the action itself
       contents: read # for private repos
@@ -248,7 +248,7 @@ jobs:
           github.event_name == 'push' ||
           github.event_name == 'workflow_dispatch'
        }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       id-token: write # for testing the action itself
       contents: read # for private repos
@@ -302,7 +302,7 @@ jobs:
           github.event_name == 'push' ||
           github.event_name == 'workflow_dispatch'
        }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       id-token: write # for testing the action itself
       contents: read # for private repos
@@ -356,7 +356,7 @@ jobs:
           github.event_name == 'push' ||
           github.event_name == 'workflow_dispatch'
        }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       id-token: write # for testing the action itself
       contents: read # for private repos
@@ -414,7 +414,7 @@ jobs:
           github.event_name == 'push' ||
           github.event_name == 'workflow_dispatch'
        }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       id-token: write # for testing the action itself
       contents: read # for private repos
@@ -451,7 +451,7 @@ jobs:
           github.event_name == 'push' ||
           github.event_name == 'workflow_dispatch'
        }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       id-token: write # for testing the action itself
       contents: read # for private repos
@@ -498,7 +498,7 @@ jobs:
       - selftest-bad-upload-url-base-url-xfail
       - selftest-bad-upload-url-base-url-xfail
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
 
     steps:
       - name: Ensure all selftests passed

@@ -5,7 +5,7 @@ description = "Get a temporary access token to a pyx registry with Trusted Publi
 readme = "README.md"
 dependencies = [
     "id",
-    "msgspec>=0.20.0",
+    "msgspec>=0.21.1",
     "packaging>=25.0",
     "rfc3986>=2.0.0",
     "urllib3",
@@ -18,7 +18,7 @@ classifiers = [
 
 [dependency-groups]
 dev = [
- "pytest>=9.0.1",
- "ruff>=0.15.9",
+ "pytest>=9.0.3",
+ "ruff>=0.15.10",
  "ty>=0.0.29",
 ]

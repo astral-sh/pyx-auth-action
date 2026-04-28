@@ -6,7 +6,7 @@ readme = "README.md"
 dependencies = [
     "id",
     "msgspec>=0.21.1",
-    "packaging>=25.0",
+    "packaging>=26.1",
     "rfc3986>=2.0.0",
     "urllib3",
 ]
@@ -19,6 +19,6 @@ classifiers = [
 [dependency-groups]
 dev = [
  "pytest>=9.0.3",
- "ruff>=0.15.10",
- "ty>=0.0.29",
+ "ruff>=0.15.11",
+ "ty>=0.0.32",
 ]

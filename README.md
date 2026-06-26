@@ -77,7 +77,7 @@ jobs:
       id-token: write # for Trusted Publishing to pyx
       contents: read # for actions/checkout, if you're in a private repo
     steps:
-      - uses: astral-sh/pyx-auth-action@91cba5589c19c6e57e4688208832a1ffd60f9044 # v0.0.10
+      - uses: astral-sh/pyx-auth-action@79e821562a189d464bb5cca38f596780342036c3 # v0.0.11
         id: auth
         with:
           index: main
@@ -98,7 +98,7 @@ If you're publishing to your workspace's default registry, you can omit the
 `registry` input:
 
 ```yaml
-- uses: astral-sh/pyx-auth-action@91cba5589c19c6e57e4688208832a1ffd60f9044 # v0.0.10
+- uses: astral-sh/pyx-auth-action@79e821562a189d464bb5cca38f596780342036c3 # v0.0.11
   id: auth
   with:
     workspace: acme
@@ -115,7 +115,7 @@ Instead of passing `workspace` and `registry`, you can pass the upload URL
 directly:
 
 ```yaml
-- uses: astral-sh/pyx-auth-action@91cba5589c19c6e57e4688208832a1ffd60f9044 # v0.0.10
+- uses: astral-sh/pyx-auth-action@79e821562a189d464bb5cca38f596780342036c3 # v0.0.11
   id: auth
   with:
     url: https://api.pyx.dev/v1/upload/acme/main

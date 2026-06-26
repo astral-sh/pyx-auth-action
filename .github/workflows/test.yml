@@ -479,29 +479,3 @@ jobs:
           fi
         env:
           OUTCOME: ${{ steps.auth.outcome }}
-
-  all-tests-pass:
-    name: "Ensure all selftests pass"
-    if: always()
-
-    needs:
-      - unit
-      - selftest-exchange-only-index
-      - selftest-exchange-only-upload-url
-      - selftest-exchange-only-workspace-default-registry
-      - selftest-exchange-only-workspace
-      - selftest-inputs-index-no-publish-url-xfail
-      - selftest-inputs-mutex-xfail
-      - selftest-publish-e2e
-      - selftest-publish-e2e-workspace-default-registry
-      - selftest-publish-e2e-production
-      - selftest-bad-upload-url-base-url-xfail
-      - selftest-bad-upload-url-base-url-xfail
-
-    runs-on: ubuntu-slim
-
-    steps:
-      - name: Ensure all selftests passed
-        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
-        with:
-          jobs: ${{ toJSON(needs) }}

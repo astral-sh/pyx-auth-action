@@ -3,6 +3,10 @@
 [![Actions status](https://github.com/astral-sh/pyx-auth-action/actions/workflows/test.yml/badge.svg)](https://github.com/astral-sh/pyx-auth-action/actions)
 [![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?logo=discord&logoColor=white)](https://discord.gg/astral-sh)
 
+> [!WARNING]
+> **This action is deprecated**. Newer versions of uv can perform Trusted
+> Publishing to pyx directly.
+
 > [!IMPORTANT]
 > If you're using uv v0.9.27 or later, you **do not need this action**!
 > You can publish directly to your pyx registry via Trusted Publishing

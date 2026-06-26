@@ -18,7 +18,7 @@ classifiers = [
 
 [dependency-groups]
 dev = [
- "pytest>=9.0.3",
- "ruff>=0.15.13",
- "ty>=0.0.37",
+ "pytest>=9.1.0",
+ "ruff>=0.15.17",
+ "ty>=0.0.49",
 ]
